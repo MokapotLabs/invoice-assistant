@@ -1,0 +1,8 @@
+Invoice Assistant
+Copyright 2026 Mokapot Labs
+
+Derived from the Invoice Assistant application by Mariano Barcia / Mokapot Labs.
+This public edition is distributed under the Apache License, Version 2.0.
+
+Built using The Pipeline Framework (TPF), https://github.com/The-Pipeline-Framework/pipelineframework.
+Third-party dependencies retain their respective copyright and license terms.

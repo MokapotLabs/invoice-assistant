@@ -1,0 +1,15 @@
+**/target/
+.DS_Store
+.idea/
+.vscode/
+.env
+.env.*
+!.env.example
+*.log
+*.pdf
+*.mv.db
+*.trace.db
+invoice-documents/
+.invoice-assistant/
+**/object-reference.key
+**/config/settings.yaml
