@@ -80,10 +80,17 @@ public final class FakeInvoiceDecisionConnector extends DecisionQueryConnectorPr
             return List.of(new DecisionProbability(selected, BigDecimal.ONE));
         }
         BigDecimal remainder = new BigDecimal("0.10");
-        BigDecimal other = remainder.divide(BigDecimal.valueOf(labels.size() - 1));
+        BigDecimal other = remainder.divide(BigDecimal.valueOf(labels.size() - 1), 12, java.math.RoundingMode.DOWN);
         List<DecisionProbability> probabilities = new ArrayList<>();
-        labels.forEach(label -> probabilities.add(
-                new DecisionProbability(label, label.equals(selected) ? new BigDecimal("0.90") : other)));
+        int remaining = labels.size() - 1;
+        for (String label : labels) {
+            if (label.equals(selected)) probabilities.add(new DecisionProbability(label, new BigDecimal("0.90")));
+            else {
+                BigDecimal probability = --remaining == 0 ? remainder : other;
+                probabilities.add(new DecisionProbability(label, probability));
+                remainder = remainder.subtract(probability);
+            }
+        }
         return List.copyOf(probabilities);
     }
 }

@@ -80,7 +80,7 @@ class InvoiceJudgmentStepTest {
         assertFalse(request.decision().stateJson().contains("approvalPolicy"));
         assertFalse(request.decision().stateJson().contains("payloadReference"));
         assertEquals(
-                List.of("maple"),
+                List.of("maple", PrepareInvoiceJudgmentStep.NO_PROPERTY),
                 request.decision().questions().getLast().criteria().stream()
                         .map(DecisionCriterion::label)
                         .toList());
@@ -112,4 +112,9 @@ class InvoiceJudgmentStepTest {
                         input,
                         result(input, "maple", "EXPLICIT_TEXT", "0.99").decisionResult()));
     }
+ @Test void noSupportedPropertyWaitsForReviewEvenWhenTheChoiceIsConfident(){
+  var input=context();var output=apply.apply(result(input,PrepareInvoiceJudgmentStep.NO_PROPERTY,"EXPLICIT_TEXT","0.99"));
+  assertTrue(output.review().facts().diagnostic().contains("human review required"));
+  assertEquals(input.review().recommendation().propertyId(),output.review().recommendation().propertyId());
+ }
 }

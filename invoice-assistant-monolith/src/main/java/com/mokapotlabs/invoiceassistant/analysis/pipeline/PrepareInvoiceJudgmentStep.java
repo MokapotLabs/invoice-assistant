@@ -18,7 +18,10 @@ public class PrepareInvoiceJudgmentStep implements ReactiveService<TextAnalysisR
         return Uni.createFrom().item(() -> prepare(result));
     }
 
+    static final String NO_PROPERTY = "__no_supported_property__";
     InvoiceJudgmentRequest prepare(TextAnalysisResult result) {
+        if (result.properties().size() > 25 || result.properties().stream().anyMatch(p -> p.id().equals(NO_PROPERTY)))
+            throw new IllegalArgumentException("Local decision supports up to 25 properties and reserves the no-supported-property label.");
         try {
             String state = new ObjectMapper()
                     .writeValueAsString(Map.of(
@@ -46,11 +49,11 @@ public class PrepareInvoiceJudgmentStep implements ReactiveService<TextAnalysisR
                             "property",
                             DecisionQuestionType.CHOICE,
                             "Choose the configured property supported by the invoice service address.",
-                            result.properties().stream()
+                            java.util.stream.Stream.concat(result.properties().stream()
                                     .map(property -> new DecisionCriterion(
                                             property.id(),
                                             property.canonicalAddress() + "; aliases: "
-                                                    + String.join(", ", property.aliases())))
+                                                    + String.join(", ", property.aliases()))), java.util.stream.Stream.of(new DecisionCriterion(NO_PROPERTY, "No configured property is supported by the service address, or the address is absent or ambiguous.")))
                                     .toList()));
             return new InvoiceJudgmentRequest(result.documentId(), result, new DecisionRequest(state, questions));
         } catch (Exception failure) {

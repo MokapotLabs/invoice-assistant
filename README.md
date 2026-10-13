@@ -14,7 +14,9 @@ ollama pull qwen3-vl:4b-instruct
 ollama pull tev1
 ./mvnw package
 export INVOICE_ASSISTANT_GRAPH_CLIENT_ID=your-public-client-application-id
-java --enable-native-access=ALL-UNNAMED   -Dinvoice-assistant.http.port=8080   -jar invoice-assistant-monolith/target/quarkus-app/quarkus-run.jar
+java --enable-native-access=ALL-UNNAMED \
+  -Dinvoice-assistant.http.port=8080 \
+  -jar invoice-assistant-monolith/target/quarkus-app/quarkus-run.jar
 ```
 
 Open <http://127.0.0.1:8080/setup>. Configure property addresses, an accountant recipient, and the email templates. The starter recipient is intentionally empty. Open **Connect Outlook** and complete Microsoft's device-code sign-in. No client secret is needed. The local session cookie is issued by the attended loopback UI. Data is stored under `~/.invoice-assistant`, separately from source. To customize or add properties, stop the application and edit `~/.invoice-assistant/config/settings.yaml`; identifiers must be unique. The form edits existing properties.
@@ -51,3 +53,5 @@ This public edition is an adaptation of an existing local tool. Its new Git hist
 ## License
 
 [Apache License 2.0](LICENSE). Dependency and model licenses remain separate; see [third-party notices](docs/third-party.md).
+
+The initial local decision configuration supports up to **25 enabled properties**. It always includes a no-supported-property choice, including when there is only one configured property; that choice forces human review.

@@ -30,17 +30,20 @@ public class ApplyInvoiceJudgmentStep implements ReactiveService<InvoiceJudgment
         if (status == SupplierEvidenceStatus.STRONG_VISUAL_IDENTITY)
             throw new IllegalArgumentException("Text decision cannot choose visual evidence.");
         var context = result.context();
-        if (context.properties().stream().noneMatch(value -> value.id().equals(property.selected())))
+        boolean unresolved = property.selected().equals(PrepareInvoiceJudgmentStep.NO_PROPERTY);
+        if (!unresolved && context.properties().stream().noneMatch(value -> value.id().equals(property.selected())))
             throw new IllegalArgumentException("Decision selected an unknown property.");
         var old = context.review().facts();
         // Low-confidence choices remain visible for review and cannot pass the approval policy.
-        String diagnostic = supplier.confidence().compareTo(new BigDecimal("0.90")) < 0
+        String diagnostic = unresolved || supplier.confidence().compareTo(new BigDecimal("0.90")) < 0
                         || property.confidence().compareTo(new BigDecimal("0.90")) < 0
                 ? "Local bounded decision is uncertain; human review required."
                 : old.diagnostic();
         var review = new InvoiceReview(
                 new InvoiceFacts(old.supplier(), status, old.invoiceNumber(), old.totalAmount(), diagnostic),
-                new PropertyRecommendation(property.selected(), "Selected by the local tev1 bounded decision Query."),
+                new PropertyRecommendation(unresolved ? context.review().recommendation().propertyId() : property.selected(),
+                        unresolved ? "No configured property is supported confidently. Check the invoice service address."
+                            : "Check that the suggested property matches the service address on the invoice."),
                 context.review().note());
         return new TextAnalysisResult(
                 context.documentId(),
