@@ -1,0 +1,67 @@
+{#include base}
+  {#title}Invoices | TPF Invoice Assistant{/title}
+  {#body}
+    <section class="task-heading"><p class="eyebrow">Property Manager</p><h1>What needs doing?</h1></section>
+    <section class="task-grid" aria-label="Tasks">
+      <a class="task-card task-card--active" href="/invoices/new"><strong>Process invoice</strong><span>Upload, review and deliver an invoice</span></a>
+    </section>
+    <section class="page-heading">
+      <div><h1>Invoices</h1><p>Upload invoices and track their delivery status.</p></div>
+      <form action="/invoices" method="post" enctype="multipart/form-data" data-max-files="{limits.maxFiles}" data-max-bytes="{limits.maxFileBytes}" data-max-batch-bytes="{limits.maxBatchBytes}">
+        <input class="visually-hidden" id="quick-invoice-files" name="file" type="file"
+               accept="application/pdf,.pdf" multiple required data-submit-on-select>
+        <label class="button button--primary" for="quick-invoice-files">↥ Upload invoice PDFs</label>
+      </form>
+    </section>
+
+    <div id="upload-message" aria-live="polite" class="message-slot"></div>
+    {#if inbox.issues.size > 0}
+      <section class="alert alert--warning" aria-label="Storage warnings">
+        <h2>Storage warnings</h2>
+        <ul>
+          {#for issue in inbox.issues}
+            <li>{issue.registryFile}: {issue.message}</li>
+          {/for}
+        </ul>
+      </section>
+    {/if}
+
+    {#if inbox.documents.size == 0}
+      <section class="empty-state"><div class="empty-state__icon">⌁</div><h2>No invoices yet</h2><p>Upload an invoice PDF to begin a reviewed delivery.</p><label class="button button--primary" for="quick-invoice-files">Upload invoice PDFs</label></section>
+    {#else}
+      <section class="card card--flush"><table class="invoice-table">
+        <thead><tr><th>Invoice</th><th>Uploaded</th><th>Storage</th><th>Delivery</th><th><span class="visually-hidden">Actions</span></th></tr></thead>
+        <tbody>
+          {#for item in inbox.documents}
+            <tr id="invoice-{item.document.documentId}">
+              <td>{item.document.originalFilename}</td>
+              <td>{item.document.uploadedAt}</td>
+              <td>{#if item.available}<span class="status status--success">● Available</span>{#else}<span class="status status--danger">● {item.availabilityMessage}</span>{/if}</td>
+              <td>
+                {#if item.reviewState.confirmation.isPresent}
+                  <a class="delivery-link" href="/invoices/{item.document.documentId}/delivery">Accountant: {item.deliveryState.notification.displayStatus} <span aria-hidden="true">›</span></a>
+                {#else if item.reviewState.status.name == 'PENDING'}
+                  <a class="status status--warning" href="/invoices/{item.document.documentId}/review">● Analysis pending</a>
+                {#else if item.reviewState.status.name == 'ANALYSIS_FAILED'}
+                  <a class="status status--danger" href="/invoices/{item.document.documentId}/review">● Analysis failed</a>
+                {#else}
+                  <a class="status status--warning" href="/invoices/{item.document.documentId}/review">● Review required</a>
+                {/if}
+              </td>
+              <td>
+                <form method="post" action="/invoices/{item.document.documentId}/dismiss"
+                      hx-post="/invoices/{item.document.documentId}/dismiss"
+                      hx-target="#invoice-{item.document.documentId}" hx-swap="outerHTML"
+                      onsubmit="return confirm('Remove this invoice from the inbox? Its audit history and files will be kept.');">
+                  <button class="button button--danger button--icon" type="submit"
+                          aria-label="Remove {item.document.originalFilename} from inbox"
+                          title="Remove from inbox">×</button>
+                </form>
+              </td>
+            </tr>
+          {/for}
+        </tbody>
+      </table></section>
+    {/if}
+  {/body}
+{/include}

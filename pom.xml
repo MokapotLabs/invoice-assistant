@@ -13,6 +13,9 @@
 
     <modules>
         <module>invoice-assistant-common</module>
+        <module>assistant-local-runtime</module>
+        <module>invoice-payload-boundaries</module>
+        <module>invoice-assistant-monolith</module>
     </modules>
 
     <properties>

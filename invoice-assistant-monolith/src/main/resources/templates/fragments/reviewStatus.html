@@ -1,0 +1,68 @@
+{#if message}
+  <p class="alert alert--danger" role="alert">{message}</p>
+{/if}
+{#if record.workflowFailure.isPresent && record.reviewState.status.name != 'ANALYSIS_FAILED'}
+  <p class="alert alert--danger" role="alert">{record.workflowFailure.get.displayMessage}</p>
+{/if}
+{#if record.reviewState.status.name == 'ANALYSIS_FAILED'}
+  <section aria-label="Analysis failed" class="workflow-card">
+    <p class="alert alert--danger">{record.reviewState.failureMessage.or('Analysis failed.')}</p>
+    <form method="post" action="/invoices/{record.document.documentId}/analysis/redrive"
+          hx-post="/invoices/{record.document.documentId}/analysis/redrive"
+          hx-target="closest section" hx-swap="outerHTML">
+      <button type="submit">Try analysis again</button>
+    </form>
+  </section>
+{#else if record.reviewState.status.name == 'REVIEW_READY'}
+  {#if navigation.active}
+    <p class="review-progress">Review {navigation.position} of {navigation.total}. Confirming hands this invoice to delivery and opens the next ready review.</p>
+  {/if}
+  <section aria-label="Invoice evidence" class="workflow-card">
+    <h2>Evidence</h2>
+    <p><strong>Supplier:</strong> {record.reviewState.review.get.facts.supplier}</p>
+    <p><strong>Supplier evidence:</strong> {record.reviewState.review.get.facts.supplierEvidenceStatus}</p>
+    <p><strong>Invoice number:</strong> {record.reviewState.review.get.facts.invoiceNumber}</p>
+    <p><strong>Invoice total:</strong> {record.reviewState.review.get.facts.totalAmount.usd}</p>
+    <p><strong>Analysis:</strong> {record.reviewState.review.get.facts.diagnostic}</p>
+    <p><strong>Recommended property:</strong> {record.reviewState.review.get.recommendation.propertyId}</p>
+    <p>{record.reviewState.review.get.recommendation.explanation}</p>
+    <p><strong>Note:</strong> {record.reviewState.review.get.note}</p>
+  </section>
+
+  <section aria-label="Confirm property" class="workflow-card">
+    <h2>Confirm property</h2>
+    <form action="/invoices/{record.document.documentId}/property" method="post">
+      {#if navigation.active}<input type="hidden" name="queue" value="{navigation.token}">{/if}
+      <label for="supplier">Supplier</label>
+      <input id="supplier" name="supplier" required value="{record.reviewState.review.get.facts.supplier}">
+      <input type="hidden" name="note" value="{record.reviewState.review.get.note}">
+      <label for="propertyId">Property</label>
+      <select id="propertyId" name="propertyId" required>
+        <option value="">Choose a property</option>
+        {#for property in properties}
+          <option value="{property.id}" {#if property.id == record.reviewState.review.get.recommendation.propertyId}selected{/if}>{property.displayName}</option>
+        {/for}
+      </select>
+      <h3>Email to send</h3>
+      <p class="field-hint">This is the exact message Outlook will send when you approve the invoice.</p>
+      <label for="emailRecipient">Recipient</label>
+      <input id="emailRecipient" name="emailRecipient" type="email" required value="{email.recipient}">
+      <label for="emailSubject">Subject</label>
+      <input id="emailSubject" name="emailSubject" required value="{email.subject}">
+      <label for="emailBody">Body</label>
+      <textarea id="emailBody" name="emailBody" rows="8" required>{email.body}</textarea>
+      <button class="button button--primary" type="submit">{#if navigation.active}Confirm and review next{#else}Confirm invoice{/if}</button>
+    </form>
+    {#if record.reviewState.confirmation.isPresent}
+      <p>Confirmed: {record.reviewState.confirmation.get.canonicalFilename}</p>
+      <p><a href="/invoices/{record.document.documentId}/delivery">Continue to delivery</a></p>
+    {/if}
+  </section>
+{#else}
+  <section aria-label="Analysis pending" class="workflow-card"
+           hx-get="/fragments/invoices/{record.document.documentId}/review-status"
+           hx-trigger="every 1s"
+           hx-swap="outerHTML">
+    <p class="status status--warning">● Analysis is pending.</p>
+  </section>
+{/if}

@@ -1,0 +1,30 @@
+{#include base}
+  {#title}Invoice upload results | TPF Invoice Assistant{/title}
+  {#body}
+    <section class="page-heading">
+      <div><h1>Invoice upload results</h1><p>{batch.acceptedCount} of {batch.items.size} invoices started analysis.</p></div>
+    </section>
+    <section class="card card--flush">
+      <table class="invoice-table">
+        <thead><tr><th>Invoice</th><th>Result</th><th><span class="visually-hidden">Action</span></th></tr></thead>
+        <tbody>
+          {#for item in batch.items}
+            <tr>
+              <td>{item.filename}</td>
+              <td>
+                {#if item.status.name == 'ACCEPTED'}<span class="status status--success">● {item.message}</span>
+                {#else if item.status.name == 'DUPLICATE'}<span class="status status--warning">● {item.message}</span>
+                {#else}<span class="status status--danger">● {item.message}</span>{/if}
+              </td>
+              <td>{#if item.duplicate}<a href="{item.reviewUrl}">View existing invoice</a>{/if}</td>
+            </tr>
+          {/for}
+        </tbody>
+      </table>
+    </section>
+    <div class="form-actions">
+      <a class="button button--secondary" href="/invoices/new">Upload more</a>
+      {#if batch.hasAccepted}<a class="button button--primary" href="/invoices/review-queue?queue={batch.reviewQueue.get.encoded}">{#if batch.acceptedCount == 1}Review invoice{#else}Review {batch.acceptedCount} invoices{/if}</a>{/if}
+    </div>
+  {/body}
+{/include}

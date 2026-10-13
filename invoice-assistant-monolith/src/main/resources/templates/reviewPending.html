@@ -1,0 +1,12 @@
+{#include base}
+  {#title}Review invoice | TPF Invoice Assistant{/title}
+  {#body}
+    <section class="page-heading"><div><h1>Review invoice</h1></div></section>
+    <section aria-label="Analysis pending" class="workflow-card"
+             hx-get="/fragments/invoices/{documentId}/review-status"
+             hx-trigger="every 1s"
+             hx-swap="outerHTML">
+      <p class="status status--warning">● Analysis is pending.</p>
+    </section>
+  {/body}
+{/include}

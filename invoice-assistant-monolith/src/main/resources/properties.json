@@ -1,0 +1,5 @@
+[
+  {"id":"maple-street","displayName":"101 Maple Street","canonicalAddress":"101 Maple Street, Exampletown, CA 90001","aliases":["Maple House"],"streetNumber":"101"},
+  {"id":"oak-avenue","displayName":"202 Oak Avenue","canonicalAddress":"202 Oak Avenue, Exampletown, CA 90002","aliases":["Oak House"],"streetNumber":"202"},
+  {"id":"pine-road","displayName":"303 Pine Road","canonicalAddress":"303 Pine Road, Sample Bay, CA 90003","aliases":["Pine Cottage"],"streetNumber":"303"}
+]

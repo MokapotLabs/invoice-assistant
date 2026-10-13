@@ -1,0 +1,47 @@
+version: 3
+appName: Invoice Payload Boundaries
+basePackage: com.mokapotlabs.invoiceassistant.payloads
+transport: REST
+platform: COMPUTE
+connectors:
+  invoice-documents:
+    provider: filesystem.objects
+    version: 1
+publish:
+  invoice-document-store:
+    kind: object
+    provider: filesystem
+    binding: invoice-documents
+    location:
+      root: invoice-documents
+sources:
+  invoice-document-store:
+    kind: object
+    provider: filesystem
+    binding: invoice-documents
+    location:
+      root: invoice-documents
+types:
+  UploadedInvoice:
+    fields:
+    - - invoice
+      - payload_ref
+httpPayloads:
+  invoice-file:
+    direction: upload
+    object: invoice-document-store
+    canonicalType: UploadedInvoice
+    referenceField: invoice
+    contentTypes:
+    - application/pdf
+    maxBytes: 2900000
+    authorizationScope: invoice.write
+  invoice-file-download:
+    direction: download
+    object: invoice-document-store
+    canonicalType: UploadedInvoice
+    referenceField: invoice
+    contentTypes:
+    - application/pdf
+    authorizationScope: invoice.read
+steps: []

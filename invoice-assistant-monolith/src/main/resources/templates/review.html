@@ -1,0 +1,7 @@
+{#include base}
+  {#title}Review invoice | TPF Invoice Assistant{/title}
+  {#body}
+    <section class="page-heading"><div><h1>Review invoice</h1><p>{record.document.originalFilename}</p></div></section>
+    {#include fragments/reviewStatus record=record message=message properties=properties /}
+  {/body}
+{/include}

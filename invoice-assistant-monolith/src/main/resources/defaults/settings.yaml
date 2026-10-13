@@ -1,0 +1,20 @@
+schemaVersion: 1
+filenameSeparator: ' - '
+autoApprove: false
+properties:
+- id: maple-street
+  displayName: 17 Maple Street
+  canonicalAddress: 17 Maple Street, Exampletown
+  aliases:
+  - 17 Maple Street
+  streetNumberPrefix: '17'
+  enabled: true
+  accountantRecipientOverride: ''
+accountant:
+  recipient: ''
+  subjectTemplate: Invoice {filename}
+  bodyTemplate: 'Invoice for {property}.
+
+    {note}
+
+    PDF attached.'

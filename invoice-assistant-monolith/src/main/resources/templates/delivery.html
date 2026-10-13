@@ -1,0 +1,13 @@
+{#include base}
+  {#title}Deliver invoice | TPF Invoice Assistant{/title}
+  {#body}
+    <section class="page-heading">
+      <div><h1>Deliver invoice</h1><p>{record.document.originalFilename}</p></div>
+      <form method="post" action="/invoices/{record.document.documentId}/dismiss"
+            onsubmit="return confirm('Remove this invoice from the inbox? Its audit history and files will be kept.');">
+        <button class="button button--danger" type="submit">× Remove from inbox</button>
+      </form>
+    </section>
+    {#include fragments/deliveryStatus record=record message=message confirmationPending=confirmationPending /}
+  {/body}
+{/include}

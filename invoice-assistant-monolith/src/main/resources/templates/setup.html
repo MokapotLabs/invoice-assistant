@@ -1,0 +1,15 @@
+{#include base}
+  {#title}Set up Invoice Assistant{/title}
+  {#navigation}
+    <span>Finish setup to open Invoice Assistant.</span>
+  {/navigation}
+  {#body}
+    <section class="page-heading"><div><h1>Set up Invoice Assistant</h1><p>Enable at least one property and enter the accountant recipient. Connect your personal Outlook account to send email.</p></div></section>
+    {#if state.repairRequired}
+      <p class="alert alert--warning" role="alert">{state.message}</p>
+      <p>Your settings file is recoverable. Saving this form replaces it with valid settings.</p>
+    {/if}
+    {#if message}<p class="alert alert--danger" role="alert">{message}</p>{/if}
+    <section class="card">{#settingsForm state=state /}</section>
+  {/body}
+{/include}

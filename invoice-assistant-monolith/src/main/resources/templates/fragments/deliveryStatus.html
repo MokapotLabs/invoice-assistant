@@ -1,0 +1,73 @@
+<section id="delivery-status" aria-label="Delivery status">
+  {#if message}
+    <p class="alert alert--danger" role="alert">{message}</p>
+  {/if}
+  {#if record.workflowFailure.isPresent}
+    <p class="alert alert--danger" role="alert">{record.workflowFailure.get.displayMessage}</p>
+  {/if}
+  {#if record.reviewState.confirmation.isEmpty}
+    {#if confirmationPending}
+      {#if record.workflowFailure.isEmpty}
+        <section aria-label="Confirmation pending" class="operation-pending"
+                 hx-get="/fragments/invoices/{record.document.documentId}/delivery-status?confirmationPending=true"
+                 hx-trigger="every 1s"
+                 hx-target="#delivery-status"
+                 hx-swap="outerHTML">
+          <p class="status status--warning">● Confirmation accepted. Starting delivery.</p>
+        </section>
+      {#else}
+        <p>Confirmation was accepted, but delivery did not start.</p>
+      {/if}
+    {#else}
+      <p>Confirm a property before starting delivery.</p>
+    {/if}
+  {#else}
+    <p><strong>Canonical filename:</strong> {record.reviewState.confirmation.get.canonicalFilename}</p>
+    <p><strong>Accountant delivery:</strong> PDF attachment</p>
+
+
+    <section aria-label="Accountant delivery operation" class="operation-card">
+      <h2>Accountant delivery</h2>
+      <p><strong>Status:</strong> <span class="status">{record.deliveryState.notification.displayStatus}</span></p>
+      {#if record.deliveryState.notification.attempts.size > 0}
+        <p>{record.deliveryState.notification.attempts.getLast.message}</p>
+        <ol>{#for attempt in record.deliveryState.notification.attempts}<li>Attempt {attempt.attemptNumber}: {attempt.status} — {attempt.message}</li>{/for}</ol>
+      {/if}
+      {#if record.deliveryState.notification.status.name == 'EXTERNAL_SESSION_REQUIRED'}
+        <p>Connect Outlook before starting a new delivery attempt. <a href="/outlook">Connect Outlook</a></p>
+      {/if}
+      {#if record.deliveryState.notification.retryable}
+        <form method="post" action="/invoices/{record.document.documentId}/delivery/retry"
+              hx-post="/invoices/{record.document.documentId}/delivery/retry"
+              hx-target="#delivery-status" hx-swap="outerHTML">
+          <button type="submit">Retry accountant delivery</button>
+        </form>
+      {/if}
+      {#if record.workflowFailure.isEmpty && (record.deliveryState.notification.status.name == 'SUCCEEDED' || record.deliveryState.notification.status.name == 'SUBMISSION_UNCERTAIN')}
+        <form method="post" action="/invoices/{record.document.documentId}/delivery/reissue"
+              hx-post="/invoices/{record.document.documentId}/delivery/reissue"
+              hx-target="#delivery-status" hx-swap="outerHTML">
+          <label for="reissue-reason">Reason for sending again</label>
+          <input id="reissue-reason" name="reason" required maxlength="240"
+                 placeholder="For example: accountant asked for another copy">
+          {#if record.deliveryState.notification.status.name == 'SUBMISSION_UNCERTAIN'}
+          <label><input type="checkbox" name="acknowledgePossibleDuplicate" value="true" required> I checked Outlook Sent Items and accept that sending again could create a duplicate.</label>
+          {/if}
+          <button type="submit">Send invoice again</button>
+        </form>
+      {/if}
+    </section>
+
+    {#if record.deliveryState.inProgress}
+      <section aria-label="Delivery pending" class="operation-pending"
+               hx-get="/fragments/invoices/{record.document.documentId}/delivery-status"
+               hx-trigger="every 1s"
+               hx-target="#delivery-status"
+               hx-swap="outerHTML">
+        <p class="status status--warning">● Delivery is in progress.</p>
+      </section>
+    {/if}
+  {/if}
+</section>
+
+<p><a href="/outlook">Connect Outlook for Graph email</a></p>

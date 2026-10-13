@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{#insert title}TPF Invoice Assistant{/insert}</title>
+  <link rel="stylesheet" href="/app.css">
+  <script src="/webjars/htmx.org/2.0.4/dist/htmx.min.js" defer></script>
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="app-header">
+    <div class="app-header__content">
+      <a class="brand" href="/" aria-label="Invoice Assistant home"><span class="brand__mark">IA</span>Invoice Assistant</a>
+      <nav class="app-navigation" aria-label="Main navigation">
+    {#insert navigation}
+      <a href="/">Invoices</a><a href="/settings">Settings</a>
+    {/insert}
+      </nav>
+    </div>
+  </header>
+  <main class="app-main">
+    {#insert body}{/insert}
+  </main>
+</body>
+</html>

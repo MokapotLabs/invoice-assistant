@@ -1,0 +1,18 @@
+{#include base}
+  {#title}Upload invoice | TPF Invoice Assistant{/title}
+  {#body}
+    <section class="card upload-card"><h1>Upload invoice PDFs</h1>
+    <p class="page-intro">Select up to {limits.maxFiles} PDFs. Each PDF may be up to {limits.maxFileMegabytes} MB and the selection may be up to {limits.maxBatchMegabytes} MB combined.</p>
+    <p>When auto-approval is enabled, clear invoices proceed automatically. Uncertain invoices are always kept for your review.</p>
+    <div id="upload-message" aria-live="polite" class="message-slot">
+      {#if message}
+        {#include fragments/message message=message duplicateUrl=duplicateUrl /}
+      {/if}
+    </div>
+    <form action="/invoices" method="post" enctype="multipart/form-data" class="upload-form" data-max-files="{limits.maxFiles}" data-max-bytes="{limits.maxFileBytes}" data-max-batch-bytes="{limits.maxBatchBytes}">
+      <label class="upload-dropzone" for="file"><span class="upload-dropzone__icon">⌑</span><strong>Drag and drop invoice PDFs here</strong><span>or click to browse</span><span id="file-name" class="upload-dropzone__filename"></span></label>
+      <input class="visually-hidden" id="file" name="file" type="file" accept="application/pdf,.pdf" multiple required data-submit-on-select>
+      <div class="form-actions"><a class="button button--secondary" href="/">Cancel</a></div>
+    </form></section>
+  {/body}
+{/include}

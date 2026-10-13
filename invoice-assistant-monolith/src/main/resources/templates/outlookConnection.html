@@ -1,0 +1,24 @@
+{#include base}
+  {#title}Connect Outlook | Invoice Assistant{/title}
+  {#body}
+  <section class="card">
+    <h1>Connect Outlook</h1>
+    <p>Use a personal Outlook.com account. This connection can send email, with no permission to read your mailbox.</p>
+    <p role="status">{state.message}</p>
+    {#if state.account.isPresent}<p>Connected account: {state.account.get}</p>{/if}
+    {#if state.challenge.isPresent}
+      <p><a href="{state.challenge.get.verificationUri}" target="_blank" rel="noopener noreferrer">Open Microsoft sign-in</a> and enter <strong>{state.challenge.get.userCode}</strong>.</p>
+      <p>The code expires at {state.challenge.get.expiresAt}.</p>
+      <script>setTimeout(() => window.location.reload(), 3000);</script>
+    {/if}
+    {#if state.status.name == 'CONNECTING'}
+      <script>setTimeout(() => window.location.reload(), 3000);</script>
+    {#else if state.status.name != 'UNCONFIGURED'}
+      <form action="/outlook/connect" method="post"><button class="button" type="submit">Connect Outlook</button></form>
+    {/if}
+    <form action="/outlook/disconnect" method="post"><button class="button button--secondary" type="submit">Disconnect Outlook</button></form>
+    <p>Credentials are protected by macOS Keychain. Mail submission requires internet access; local invoice analysis does not.</p>
+    <a href="/settings">Back to settings</a>
+  </section>
+  {/body}
+{/include}

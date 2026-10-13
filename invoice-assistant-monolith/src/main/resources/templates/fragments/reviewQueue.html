@@ -1,0 +1,23 @@
+<section id="review-queue" class="workflow-card"
+         {#if !queue.complete}hx-get="/fragments/invoices/review-queue?queue={queue.token.encoded}" hx-trigger="every 1s" hx-swap="outerHTML"{/if}>
+  {#if queue.complete}
+    <h2>Invoice review handoff complete</h2>
+    <p><strong>{queue.handedOffCount}</strong> invoices were handed off for delivery.</p>
+    {#if queue.failedCount > 0}<p class="alert alert--warning">{queue.failedCount} invoices could not be handed off. Their individual status remains available from the inbox.</p>{/if}
+    <p>You can close this Invoice Assistant tab. Keep Invoice Assistant running and leave the Microsoft work-browser window open while delivery finishes.</p>
+    <div class="button-row"><a class="button button--primary" href="/">Open invoice inbox</a><a class="button button--secondary" href="/invoices/new">Upload more invoices</a></div>
+  {#else}
+    <h2>Waiting for invoice analysis</h2>
+    <p>The next ready invoice will open automatically.</p>
+  {/if}
+  <ul class="review-queue-list">
+    {#for item in queue.items}
+      <li>
+        <span>{item.filename}</span>
+        {#if item.status.name == 'HANDED_OFF'}<span class="status status--success">● {item.message}</span>
+        {#else if item.status.name == 'FAILED' || item.status.name == 'UNAVAILABLE'}<span class="status status--danger">● {item.message}</span>
+        {#else}<span class="status status--warning">● {item.message}</span>{/if}
+      </li>
+    {/for}
+  </ul>
+</section>
