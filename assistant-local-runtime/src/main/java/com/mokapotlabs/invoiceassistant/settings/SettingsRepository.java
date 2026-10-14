@@ -59,6 +59,11 @@ public class SettingsRepository {
         atomicWrite(render(settings));
     }
 
+    /** Merge a partial settings form against the latest persisted state under the same lock. */
+    public synchronized void update(java.util.function.UnaryOperator<ApplicationSettings> change) throws IOException {
+        save(change.apply(initializeAndLoad().settings()));
+    }
+
     public Path path() {
         return settingsPath;
     }

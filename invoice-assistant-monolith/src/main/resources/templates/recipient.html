@@ -1,0 +1,16 @@
+{#include base}
+  {#title}Recipient | Invoice Assistant{/title}
+  {#navigation}<a href="/catalogue">Catalogue</a><a href="/recipient" aria-current="page">Recipient</a>{/navigation}
+  {#body}
+    <section class="page-heading"><div><h1>Recipient</h1><p>Choose who receives invoices and how the email reads.</p></div></section>
+    {#if state.repairRequired}<p class="alert alert--warning" role="alert">{state.message}</p>{/if}
+    {#if message}<p class="alert alert--danger" role="alert">{message}</p>{/if}
+    {#if saved}<p class="alert alert--success" role="status">Changes saved.</p>{/if}
+    <section class="card">
+      <form action="/recipient" method="post" class="settings-form">
+        {#recipientFields state=state /}
+        <div class="form-actions"><button class="button button--primary" type="submit">Save Recipient</button></div>
+      </form>
+    </section>
+  {/body}
+{/include}

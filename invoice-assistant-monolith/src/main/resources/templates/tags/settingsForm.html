@@ -1,32 +1,5 @@
-<p><a href="/outlook">Connect Outlook for Graph email</a></p>
-<form action="/settings" method="post" class="settings-form">
-  <section class="settings-section">
-    <h2>Automatic invoice approval</h2>
-    <label><input type="checkbox" name="autoApprove" value="true" {#if state.settings.autoApprove}checked{/if}> Automatically approve and deliver clear invoices</label>
-    <p>Off by default. Requires invoice facts and one property address in the PDF text, no extraction warnings, and ready delivery settings. Uncertain invoices always wait for review. Changes apply to newly admitted invoices.</p>
-  </section>
-  <label>Filename separator <input name="filenameSeparator" value="{state.settings.filenameSeparator}"></label>
-  <p>The separator joins the property number, supplier, invoice number, amount and original filename. The default is <code>_</code>.</p>
-  <section class="settings-section" aria-labelledby="properties-heading">
-  <h2 id="properties-heading">Properties</h2>
-  <div class="properties-grid">{#for property in state.settings.properties}
-    <fieldset>
-      <legend>{property.id}</legend>
-      <input type="hidden" name="propertyId" value="{property.id}">
-      <label>Name <input name="displayName" value="{property.displayName}"></label>
-      <label>Address <input name="canonicalAddress" value="{property.canonicalAddress}"></label>
-      <label>Street number <input name="streetNumberPrefix" value="{property.streetNumberPrefix}"></label>
-      <label>Accountant recipient override <input name="accountantRecipientOverride" type="email" placeholder="Leave blank to use the default recipient" value="{property.accountantRecipientOverride}"></label>
-      <label><input type="checkbox" name="enabled" value="{property.id}" {#if property.enabled}checked{/if}> Enabled</label>
-    </fieldset>
-  {/for}</div>
-  </section>
-  <section class="settings-section" aria-labelledby="accountant-delivery-heading">
-  <h2 id="accountant-delivery-heading">Accountant delivery</h2>
-  <label>Recipient <input type="email" name="recipient" value="{state.settings.accountant.recipient}"></label>
-  <label>Subject template <input name="subjectTemplate" value="{state.settings.accountant.subjectTemplate}"></label>
-  <label>Body template <textarea name="bodyTemplate">{state.settings.accountant.bodyTemplate}</textarea></label>
-  <p>Templates may use <code>&#123;property&#125;</code>, <code>&#123;property-street-number&#125;</code>, <code>&#123;supplier&#125;</code>, <code>&#123;note&#125;</code> and <code>&#123;filename&#125;</code>.</p>
-  </section>
+<form action="/setup" method="post" class="settings-form">
+  {#catalogueFields state=state /}
+  {#recipientFields state=state /}
   <div class="form-actions"><button class="button button--primary" type="submit">Save configuration and continue</button></div>
 </form>

@@ -58,6 +58,10 @@ p { color: var(--muted); line-height: 1.5; }
 .button--danger, button.button--danger { color: var(--red); background: #fff; border-color: #fca5a5; }
 .button--icon { min-width: 2rem; padding: 5px 9px; font-size: 1rem; line-height: 1; }
 .button-row, .form-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.upload-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 18px; }
+.approval-preference { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; min-height: 40px; }
+.approval-preference input { width: 17px; min-height: 17px; height: 17px; padding: 0; accent-color: var(--blue); }
+.approval-preference-status[role="alert"] { color: var(--red); font-size: .82rem; }
 .form-actions { justify-content: flex-end; margin-top: 16px; }
 
 .invoice-table { width: 100%; border-collapse: collapse; font-size: .84rem; }
@@ -86,6 +90,7 @@ label { display: grid; gap: 6px; color: #334155; font-size: .82rem; font-weight:
 input, select, textarea { width: 100%; min-height: 40px; padding: 9px 10px; font: inherit; color: var(--ink); border: 1px solid #cbd5e1; border-radius: 7px; background: #fff; }
 textarea { min-height: 90px; resize: vertical; } input:focus, select:focus, textarea:focus { outline: 2px solid rgba(37, 99, 235, .3); outline-offset: 1px; border-color: var(--blue); }
 fieldset { margin: 0; border: 1px solid var(--line); border-radius: 9px; padding: 16px; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+.properties-grid fieldset { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 .settings-field--wide { grid-column: 1 / -1; }
 legend { padding: 0 5px; color: var(--navy); font-weight: 750; font-size: .9rem; } fieldset label:last-child { display: flex; align-items: center; gap: 8px; padding-top: 22px; } fieldset label:last-child input { width: 38px; accent-color: var(--blue); }
 
@@ -96,4 +101,4 @@ legend { padding: 0 5px; color: var(--navy); font-weight: 750; font-size: .9rem;
 .operation-card { display: grid; gap: 2px; }.operation-card form { margin-top: 8px; }.operation-pending { background: #fffbeb; border: 1px solid #fcd34d !important; border-radius: 8px; padding: 12px !important; }
 ol { padding-left: 20px; color: var(--muted); font-size: .86rem; } code { background: #eff6ff; color: #1d4ed8; padding: 2px 4px; border-radius: 4px; }
 
-@media (max-width: 760px) { .app-header__content, .app-main { width: min(100% - 28px, 1120px); }.page-heading, .app-header__content { align-items: stretch; flex-direction: column; }.page-heading .button { width: 100%; }.invoice-table { min-width: 720px; }.card--flush { overflow-x: auto; }.settings-grid, fieldset { grid-template-columns: 1fr; }.browser-card { display: block; }.app-main { padding-top: 24px; } }
+@media (max-width: 760px) { .app-header__content, .app-main { width: min(100% - 28px, 1120px); }.page-heading, .app-header__content { align-items: stretch; flex-direction: column; }.page-heading .button { width: 100%; }.invoice-table { min-width: 720px; }.card--flush { overflow-x: auto; }.settings-grid, fieldset, .properties-grid fieldset { grid-template-columns: 1fr; }.browser-card { display: block; }.app-main { padding-top: 24px; } }

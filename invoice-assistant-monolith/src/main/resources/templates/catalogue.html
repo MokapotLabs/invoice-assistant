@@ -1,0 +1,16 @@
+{#include base}
+  {#title}Catalogue | Invoice Assistant{/title}
+  {#navigation}<a href="/catalogue" aria-current="page">Catalogue</a><a href="/recipient">Recipient</a>{/navigation}
+  {#body}
+    <section class="page-heading"><div><h1>Catalogue</h1><p>Manage property names, addresses and invoice filenames.</p></div></section>
+    {#if state.repairRequired}<p class="alert alert--warning" role="alert">{state.message}</p>{/if}
+    {#if message}<p class="alert alert--danger" role="alert">{message}</p>{/if}
+    {#if saved}<p class="alert alert--success" role="status">Changes saved.</p>{/if}
+    <section class="card">
+      <form action="/catalogue" method="post" class="settings-form">
+        {#catalogueFields state=state /}
+        <div class="form-actions"><button class="button button--primary" type="submit">Save Catalogue</button></div>
+      </form>
+    </section>
+  {/body}
+{/include}

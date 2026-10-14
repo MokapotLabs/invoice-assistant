@@ -7,11 +7,14 @@
     </section>
     <section class="page-heading">
       <div><h1>Invoices</h1><p>Upload invoices and track their delivery status.</p></div>
-      <form action="/invoices" method="post" enctype="multipart/form-data" data-max-files="{limits.maxFiles}" data-max-bytes="{limits.maxFileBytes}" data-max-batch-bytes="{limits.maxBatchBytes}">
-        <input class="visually-hidden" id="quick-invoice-files" name="file" type="file"
-               accept="application/pdf,.pdf" multiple required data-submit-on-select>
-        <label class="button button--primary" for="quick-invoice-files">↥ Upload invoice PDFs</label>
-      </form>
+      <div class="upload-actions">
+        {#approvalPreference enabled=autoApprove /}
+        <form action="/invoices" method="post" enctype="multipart/form-data" data-max-files="{limits.maxFiles}" data-max-bytes="{limits.maxFileBytes}" data-max-batch-bytes="{limits.maxBatchBytes}">
+          <input class="visually-hidden" id="quick-invoice-files" name="file" type="file"
+                 accept="application/pdf,.pdf" multiple required data-submit-on-select>
+          <label class="button button--primary" for="quick-invoice-files">↥ Upload invoice PDFs</label>
+        </form>
+      </div>
     </section>
 
     <div id="upload-message" aria-live="polite" class="message-slot"></div>

@@ -1,0 +1,15 @@
+  <section class="settings-section" aria-labelledby="accountant-delivery-heading">
+  <h2 id="accountant-delivery-heading">Email</h2>
+  <label>Recipient <input type="email" name="recipient" value="{state.settings.accountant.recipient}"></label>
+  <label>Subject template <input name="subjectTemplate" value="{state.settings.accountant.subjectTemplate}"></label>
+  <label>Body template <textarea name="bodyTemplate">{state.settings.accountant.bodyTemplate}</textarea></label>
+  <p>Templates may use <code>&#123;property&#125;</code>, <code>&#123;property-street-number&#125;</code>, <code>&#123;supplier&#125;</code>, <code>&#123;note&#125;</code> and <code>&#123;filename&#125;</code>.</p>
+  </section>
+  <section class="settings-section">
+    <h2>Recipients by property</h2>
+    <p>Leave these blank to use the recipient above.</p>
+    {#for property in state.settings.properties}
+      <input type="hidden" name="recipientPropertyId" value="{property.id}">
+      <label>{property.displayName} <input name="accountantRecipientOverride" type="email" value="{property.accountantRecipientOverride}" placeholder="Use default recipient"></label>
+    {/for}
+  </section>

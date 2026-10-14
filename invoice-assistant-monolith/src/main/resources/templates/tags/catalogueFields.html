@@ -1,0 +1,18 @@
+  <section class="settings-section" aria-labelledby="properties-heading">
+    <h2 id="properties-heading">Properties</h2>
+    <div class="properties-grid">{#for property in state.settings.properties}
+      <fieldset>
+        <legend>{property.id}</legend>
+        <input type="hidden" name="propertyId" value="{property.id}">
+        <label>Name <input name="displayName" value="{property.displayName}"></label>
+        <label>Address <input name="canonicalAddress" value="{property.canonicalAddress}"></label>
+        <label>Street number <input name="streetNumberPrefix" value="{property.streetNumberPrefix}"></label>
+        <label><input type="checkbox" name="enabled" value="{property.id}" {#if property.enabled}checked{/if}> Enabled</label>
+      </fieldset>
+    {/for}</div>
+  </section>
+  <section class="settings-section">
+      <h2>Invoice filenames</h2>
+    <label>Filename separator <input name="filenameSeparator" value="{state.settings.filenameSeparator}"></label>
+    <p>Joins the property number, supplier, invoice number and amount. The default is <code>_</code>.</p>
+  </section>

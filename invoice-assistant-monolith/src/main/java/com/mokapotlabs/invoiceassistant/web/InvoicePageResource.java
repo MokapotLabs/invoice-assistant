@@ -62,9 +62,10 @@ public class InvoicePageResource {
 
     @CheckedTemplate(basePath = "")
     static class Templates {
-        static native TemplateInstance inbox(InvoiceInbox inbox, InvoiceUploadLimits limits);
+        static native TemplateInstance inbox(InvoiceInbox inbox, InvoiceUploadLimits limits, boolean autoApprove);
 
-        static native TemplateInstance upload(InvoiceUploadLimits limits, String message, String duplicateUrl);
+        static native TemplateInstance upload(
+                InvoiceUploadLimits limits, String message, String duplicateUrl, boolean autoApprove);
 
         static native TemplateInstance uploadBatch(InvoiceBatchUploadView batch, InvoiceUploadLimits limits);
 
@@ -106,7 +107,11 @@ public class InvoicePageResource {
         if (!settingsRepository.initializeAndLoad().settings().isReady()) {
             return Response.seeOther(URI.create("/setup")).build();
         }
-        return Response.ok(Templates.inbox(facade.inbox(), uploadLimits())).build();
+        return Response.ok(Templates.inbox(
+                        facade.inbox(),
+                        uploadLimits(),
+                        settingsRepository.load().settings().autoApprove()))
+                .build();
     }
 
     @GET
@@ -114,7 +119,8 @@ public class InvoicePageResource {
     @Produces(MediaType.TEXT_HTML)
     @Blocking
     public TemplateInstance uploadForm() {
-        return Templates.upload(uploadLimits(), "", "");
+        return Templates.upload(
+                uploadLimits(), "", "", settingsRepository.load().settings().autoApprove());
     }
 
     @POST
@@ -463,7 +469,11 @@ public class InvoicePageResource {
             return Response.ok(Fragments.message(message, duplicateUrl)).build();
         }
         return Response.status(Response.Status.BAD_REQUEST)
-                .entity(Templates.upload(uploadLimits(), message, duplicateUrl))
+                .entity(Templates.upload(
+                        uploadLimits(),
+                        message,
+                        duplicateUrl,
+                        settingsRepository.load().settings().autoApprove()))
                 .build();
     }
 

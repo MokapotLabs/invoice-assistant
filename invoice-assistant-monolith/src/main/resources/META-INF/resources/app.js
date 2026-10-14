@@ -1,4 +1,39 @@
 document.addEventListener("DOMContentLoaded", () => {
+  const preference = document.querySelector("[data-approval-preference]");
+  let preferenceSave = Promise.resolve(true);
+  if (preference) {
+    let saved = preference.checked;
+    const status = document.querySelector("[data-approval-status]");
+    preference.addEventListener("change", () => {
+      const desired = preference.checked;
+      preference.disabled = true;
+      status.textContent = "Saving approval preference…";
+      preferenceSave = (async () => {
+        try {
+          await fetch("/", { credentials: "same-origin" });
+          const response = await fetch("/preferences/auto-approval", {
+            method: "POST", credentials: "same-origin",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({ enabled: String(desired) })
+          });
+          if (!response.ok) throw new Error("Preference save failed");
+          saved = desired;
+          status.classList.add("visually-hidden");
+          status.setAttribute("role", "status");
+          status.textContent = "Approval preference saved.";
+          return true;
+        } catch (error) {
+          preference.checked = saved;
+          status.classList.remove("visually-hidden");
+          status.setAttribute("role", "alert");
+          status.textContent = "Couldn't save approval preference. Please try again.";
+          return false;
+        } finally {
+          preference.disabled = false;
+        }
+      })();
+    });
+  }
   document.querySelectorAll("input[type='file'][data-submit-on-select]").forEach((fileInput) => {
     const form = fileInput.form;
     const label = form.querySelector("#file-name");
@@ -19,9 +54,15 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
       fileInput.disabled = true;
+      if (preference) preference.disabled = true;
       const admitted = [];
       const errors = [];
       try {
+        if (!await preferenceSave) {
+          message.textContent = "Save the approval preference before uploading.";
+          return;
+        }
+        if (preference) preference.disabled = true;
         // Establish the attended local session, including when this page was opened directly.
         await fetch("/", { credentials: "same-origin" });
         for (const [index, file] of files.entries()) {
@@ -43,7 +84,9 @@ document.addEventListener("DOMContentLoaded", () => {
           message.textContent = errors.join(" ");
           return;
         }
-        message.textContent = "Checking invoices… Clear invoices proceed automatically; uncertain invoices await review.";
+        message.textContent = preference?.checked
+          ? "Checking invoices… Confident invoices proceed automatically; uncertain invoices await review."
+          : "Checking invoices… Invoices will wait for your review.";
         const response = await fetch("/invoices", {
           method: "POST", credentials: "same-origin",
           headers: { "Content-Type": "application/json", "HX-Request": "true" },
@@ -81,6 +124,7 @@ document.addEventListener("DOMContentLoaded", () => {
       } finally {
         fileInput.disabled = false;
         fileInput.value = "";
+        if (preference) preference.disabled = false;
       }
     });
   });

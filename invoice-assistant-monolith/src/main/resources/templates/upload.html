@@ -3,7 +3,7 @@
   {#body}
     <section class="card upload-card"><h1>Upload invoice PDFs</h1>
     <p class="page-intro">Select up to {limits.maxFiles} PDFs. Each PDF may be up to {limits.maxFileMegabytes} MB and the selection may be up to {limits.maxBatchMegabytes} MB combined.</p>
-    <p>When auto-approval is enabled, clear invoices proceed automatically. Uncertain invoices are always kept for your review.</p>
+    {#approvalPreference enabled=autoApprove /}
     <div id="upload-message" aria-live="polite" class="message-slot">
       {#if message}
         {#include fragments/message message=message duplicateUrl=duplicateUrl /}
