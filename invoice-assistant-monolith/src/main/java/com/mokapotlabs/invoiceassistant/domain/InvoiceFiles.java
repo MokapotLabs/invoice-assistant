@@ -12,7 +12,8 @@ public record InvoiceFiles(
         PayloadReference catalogue,
         PayloadReference invoiceReference,
         String invoiceSourceIdentity,
-        String catalogueSourceIdentity) {
+        String catalogueSourceIdentity)
+        implements InvoiceEntry {
     public InvoiceFiles(
             UUID documentId, String originalFilename, PayloadReference invoice, PayloadReference catalogue) {
         this(

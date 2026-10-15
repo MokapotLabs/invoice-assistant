@@ -109,6 +109,12 @@ aspects:
       enabledTargets:
       - LOCAL_CLIENT_STEP
 types:
+  InvoiceEntry:
+    java: com.mokapotlabs.invoiceassistant.domain.InvoiceEntry
+    variants:
+      invoice: InvoiceFiles
+      review: ReviewReady
+      notification: NotifyAttempt
   InvoiceJudgmentRequest:
     java: com.mokapotlabs.invoiceassistant.domain.InvoiceJudgmentRequest
     fields:
@@ -574,7 +580,8 @@ steps:
 - name: Prepare Invoice Analysis
   service: com.mokapotlabs.invoiceassistant.analysis.pipeline.PrepareInvoiceAnalysisStep
   cardinality: ONE_TO_ONE
-  input: InvoiceFiles
+  input: InvoiceEntry
+  accepts: [InvoiceFiles]
   output: InvoiceAnalysisRequest
   java:
     input: com.mokapotlabs.invoiceassistant.domain.InvoiceFiles

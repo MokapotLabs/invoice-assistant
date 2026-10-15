@@ -13,6 +13,11 @@
       <button type="submit">Try analysis again</button>
     </form>
   </section>
+{#else if record.reviewState.confirmation.isPresent}
+  <section aria-label="Invoice confirmed" class="workflow-card">
+    <p>Confirmed: {record.reviewState.confirmation.get.canonicalFilename}</p>
+    <a class="button button--primary" href="/invoices/{record.document.documentId}/delivery">Continue to delivery</a>
+  </section>
 {#else if record.reviewState.status.name == 'REVIEW_READY'}
   {#if navigation.active}
     <p class="review-progress">Review {navigation.position} of {navigation.total}. Confirming hands this invoice to delivery and opens the next ready review.</p>

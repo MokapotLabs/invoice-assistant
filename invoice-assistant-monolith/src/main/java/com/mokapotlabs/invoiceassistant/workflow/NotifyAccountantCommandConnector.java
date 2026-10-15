@@ -33,7 +33,6 @@ public class NotifyAccountantCommandConnector implements CommandConnector<Notify
                     NotifyAccountantResult result =
                             accountantNotification.notifyAccountant(command.document(), command.confirmedInvoice());
                     if (result.status() != DeliveryOperationStatus.SUCCEEDED
-                            && result.status() != DeliveryOperationStatus.USER_ACTION_REQUIRED
                             && result.status() != DeliveryOperationStatus.SUBMISSION_UNCERTAIN) {
                         throw new DeliveryCommandFailure(result.status(), result.message());
                     }

@@ -2,6 +2,7 @@ package com.mokapotlabs.invoiceassistant.domain;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import org.pipelineframework.repository.PayloadReference;
 
@@ -16,8 +17,8 @@ public record ReviewReady(
         String filenameSeparator,
         List<Property> properties,
         InvoiceReview review,
-        java.util.Optional<InvoiceEvidence> evidence)
-        implements AnalysisRoute, InvoiceApprovalRoute {
+        Optional<InvoiceEvidence> evidence)
+        implements AnalysisRoute, InvoiceApprovalRoute, InvoiceEntry {
     public ReviewReady(
             UUID reviewId,
             UUID documentId,
@@ -40,7 +41,7 @@ public record ReviewReady(
                 filenameSeparator,
                 properties,
                 review,
-                java.util.Optional.empty());
+                Optional.empty());
     }
 
     public ReviewReady {

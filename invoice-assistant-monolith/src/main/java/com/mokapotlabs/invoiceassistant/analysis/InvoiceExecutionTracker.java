@@ -50,6 +50,13 @@ public class InvoiceExecutionTracker {
         return claimed.get();
     }
 
+    public synchronized boolean claimDeliveryRecovery(UUID documentId, String notificationCommandId) {
+        var current = states.get(documentId);
+        if (current != null && (current.running() || current.retryTarget().isPresent())) return false;
+        deliveryRunning(documentId, notificationCommandId);
+        return true;
+    }
+
     public synchronized void deliveryRunning(UUID documentId) {
         synchronized (successfulDeliveries) {
             successfulDeliveries.remove(documentId);
@@ -85,7 +92,8 @@ public class InvoiceExecutionTracker {
     }
 
     public synchronized void completed(UUID documentId, Phase phase, String executionId, long executionVersion) {
-        states.remove(documentId);
+        var current = states.get(documentId);
+        if (current != null && current.phase() == phase) states.remove(documentId);
         if (phase == Phase.DELIVERY) {
             Optional.ofNullable(notificationCommandIds.get(documentId))
                     .ifPresent(commandId -> rememberSuccessfulDelivery(

@@ -11,6 +11,7 @@ import com.mokapotlabs.invoiceassistant.storage.InvoiceInboxService;
 import jakarta.enterprise.context.ApplicationScoped;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @ApplicationScoped
 public class InvoiceAssistantFacade {
@@ -43,11 +44,11 @@ public class InvoiceAssistantFacade {
         return inboxService.inbox();
     }
 
-    public void dismissFromInbox(java.util.UUID documentId) {
+    public void dismissFromInbox(UUID documentId) {
         inboxService.dismiss(documentId);
     }
 
-    public Optional<InvoiceReadModel> review(java.util.UUID documentId) {
+    public Optional<InvoiceReadModel> review(UUID documentId) {
         return readSide.find(documentId);
     }
 
@@ -56,13 +57,19 @@ public class InvoiceAssistantFacade {
     }
 
     public ConfirmationResult confirmProperty(
-            java.util.UUID documentId,
+            UUID documentId,
             String propertyId,
             String supplier,
             String note,
             String emailRecipient,
             String emailSubject,
             String emailBody) {
+        // A repeated form submission must lead back to delivery, never admit another effect.
+        if (review(documentId)
+                .flatMap(record -> record.reviewState().confirmation())
+                .isPresent()) {
+            return new ConfirmationResult.Accepted();
+        }
         if (propertyId == null || propertyId.isBlank()) {
             return new ConfirmationResult.Rejected("Choose a configured property before confirming.");
         }
@@ -93,15 +100,19 @@ public class InvoiceAssistantFacade {
         }
     }
 
-    public DeliveryRetryResult retryDelivery(java.util.UUID documentId) {
+    public DeliveryRetryResult retryDelivery(UUID documentId) {
         return workflow.retryDelivery(documentId);
     }
 
-    public DeliveryRetryResult redriveAnalysis(java.util.UUID documentId) {
+    public DeliveryRetryResult retryDelivery(UUID documentId, boolean acknowledgePossibleDuplicate) {
+        return workflow.retryDelivery(documentId, acknowledgePossibleDuplicate);
+    }
+
+    public DeliveryRetryResult redriveAnalysis(UUID documentId) {
         return workflow.redriveAnalysis(documentId);
     }
 
-    public DeliveryRetryResult reissueNotification(java.util.UUID documentId, String reason) {
+    public DeliveryRetryResult reissueNotification(UUID documentId, String reason) {
         return workflow.reissueNotification(documentId, reason);
     }
 }

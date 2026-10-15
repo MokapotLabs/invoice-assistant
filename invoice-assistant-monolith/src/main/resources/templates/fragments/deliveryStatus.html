@@ -40,6 +40,9 @@
         <form method="post" action="/invoices/{record.document.documentId}/delivery/retry"
               hx-post="/invoices/{record.document.documentId}/delivery/retry"
               hx-target="#delivery-status" hx-swap="outerHTML">
+          {#if record.workflowFailure.isPresent && record.workflowFailure.get.code == 'delivery-interrupted'}
+          <label><input type="checkbox" name="acknowledgePossibleDuplicate" value="true" required> I checked Outlook Sent Items and accept a possible duplicate.</label>
+          {/if}
           <button type="submit">Retry accountant delivery</button>
         </form>
       {/if}

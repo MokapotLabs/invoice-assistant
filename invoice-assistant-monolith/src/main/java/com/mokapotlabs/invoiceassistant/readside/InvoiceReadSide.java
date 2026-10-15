@@ -7,6 +7,7 @@ import com.mokapotlabs.invoiceassistant.storage.InvoiceInboxItem;
 import com.mokapotlabs.invoiceassistant.storage.InvoiceReviewState;
 import com.mokapotlabs.invoiceassistant.storage.InvoiceWorkflowFailure;
 import jakarta.enterprise.context.ApplicationScoped;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Optional;
 import java.util.UUID;
@@ -60,6 +61,18 @@ public class InvoiceReadSide {
             return record.withReviewState(InvoiceReviewState.failed(failure.displayMessage()))
                     .withWorkflowFailure(failure);
         }
+        if (record.reviewState().confirmation().isPresent()
+                && record.deliveryState().notification().status() != DeliveryOperationStatus.SUCCEEDED
+                && record.deliveryState().notification().status() != DeliveryOperationStatus.SUBMISSION_UNCERTAIN) {
+            return failed(
+                    record,
+                    InvoiceExecutionTracker.Phase.DELIVERY,
+                    new InvoiceWorkflowFailure(
+                            "Invoice delivery",
+                            "delivery-interrupted",
+                            "The application stopped before delivery was recorded. Check Outlook Sent Items before retrying.",
+                            record.reviewState().confirmation().orElseThrow().confirmedAt()));
+        }
         return record;
     }
 
@@ -70,8 +83,16 @@ public class InvoiceReadSide {
                     .withWorkflowFailure(failure);
         }
         var delivery = record.deliveryState();
-        delivery = delivery.withNotification(delivery.notification()
-                .record(DeliveryOperationStatus.FAILED, failure.displayMessage(), Optional.empty()));
+        DeliveryOperationStatus status = Arrays.stream(DeliveryOperationStatus.values())
+                .filter(candidate -> switch (candidate) {
+                    case FAILED, EXTERNAL_SESSION_REQUIRED, USER_ACTION_REQUIRED, INTERRUPTED -> true;
+                    default -> false;
+                })
+                .filter(candidate -> failure.message().contains("delivery-status=" + candidate.name() + ";"))
+                .findFirst()
+                .orElse(DeliveryOperationStatus.FAILED);
+        delivery = delivery.withNotification(
+                delivery.notification().record(status, failure.displayMessage(), Optional.empty()));
         return record.withDeliveryState(delivery).withWorkflowFailure(failure);
     }
 

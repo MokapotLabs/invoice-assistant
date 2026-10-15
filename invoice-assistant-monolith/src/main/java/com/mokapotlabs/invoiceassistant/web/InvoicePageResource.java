@@ -380,8 +380,10 @@ public class InvoicePageResource {
     @Produces(MediaType.TEXT_HTML)
     @Blocking
     public Response retryDelivery(
-            @PathParam("documentId") UUID documentId, @HeaderParam("HX-Request") String htmxRequest) {
-        DeliveryRetryResult result = facade.retryDelivery(documentId);
+            @PathParam("documentId") UUID documentId,
+            @RestForm("acknowledgePossibleDuplicate") boolean acknowledgePossibleDuplicate,
+            @HeaderParam("HX-Request") String htmxRequest) {
+        DeliveryRetryResult result = facade.retryDelivery(documentId, acknowledgePossibleDuplicate);
         if (result instanceof DeliveryRetryResult.Accepted) {
             if (!isHtmx(htmxRequest)) {
                 return Response.seeOther(URI.create("/invoices/" + documentId + "/delivery"))

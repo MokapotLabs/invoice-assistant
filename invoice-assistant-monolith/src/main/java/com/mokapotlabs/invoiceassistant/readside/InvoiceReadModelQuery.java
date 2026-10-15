@@ -44,6 +44,7 @@ public class InvoiceReadModelQuery {
                 .toList();
     }
 
+    @jakarta.enterprise.context.control.ActivateRequestContext
     public Optional<InvoiceReadModel> find(UUID documentId) {
         return admissions
                 .find(documentId)

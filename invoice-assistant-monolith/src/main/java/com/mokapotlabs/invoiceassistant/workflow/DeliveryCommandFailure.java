@@ -8,7 +8,9 @@ public final class DeliveryCommandFailure extends RuntimeException {
     private final DeliveryOperationStatus status;
 
     public DeliveryCommandFailure(DeliveryOperationStatus status, String message) {
-        super(message == null || message.isBlank() ? "Delivery provider failed without detail." : message.trim());
+        super("delivery-status="
+                + Objects.requireNonNull(status, "status must not be null").name() + "; "
+                + (message == null || message.isBlank() ? "Delivery provider failed without detail." : message.trim()));
         this.status = Objects.requireNonNull(status, "status must not be null");
         if (status == DeliveryOperationStatus.SUCCEEDED) {
             throw new IllegalArgumentException("a successful delivery is not a command failure");

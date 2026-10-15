@@ -57,3 +57,8 @@ This public edition is an adaptation of an existing local tool. Its new Git hist
 [Apache License 2.0](LICENSE). Dependency and model licenses remain separate; see [third-party notices](docs/third-party.md).
 
 The initial local decision configuration supports up to **25 enabled properties**. It always includes a no-supported-property choice, including when there is only one configured property; that choice forces human review.
+
+Expired and restarted reviews resume their saved analysis and checksum-verified original catalogue when confirmed,
+without another LLM call or reapplying automatic approval. Approved invoices lead to delivery and repeated confirmation
+submissions leave the approved message unchanged. When the previous execution is unavailable, recovery requires
+checking Outlook Sent Items and accepting a possible duplicate. Native command retry/reissue retains effect authority.
