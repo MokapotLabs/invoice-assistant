@@ -835,7 +835,8 @@ steps:
     operationOutput:
       type: PropertyConfirmationRequest
       java: com.mokapotlabs.invoiceassistant.interaction.PropertyConfirmationRequest
-    timeout: PT8H
+    # Invoice reviews often wait overnight or across a weekend.
+    timeout: P30D
     idempotency:
       fields:
       - documentId

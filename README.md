@@ -2,7 +2,9 @@
 
 A local, attended invoice assistant for property managers. Upload one PDF or a batch, extract invoice details with Ollama, review the proposed property and email, and send the PDF to your accountant through a personal Outlook.com account.
 
-The application is built on The Pipeline Framework **26.10.1-SNAPSHOT**. Its typed pipeline owns Queries, deferred confirmation, Commands, and the persisted audit trail. PDF upload and download use generated authenticated HTTP payload boundaries. Automatic approval is **off by default**: select **Approve if confident** beside the upload button for newly uploaded invoices. Missing facts, low-confidence decisions, ambiguous addresses, extraction warnings, or unavailable delivery settings require review.
+The application is built on The Pipeline Framework **26.10.1-SNAPSHOT**. Its typed pipeline owns Queries, deferred confirmation, Commands, and the persisted audit trail. PDF upload and download use generated authenticated HTTP payload boundaries. Manual confirmation requests remain open for 30 days while the application stays running.
+
+Automatic approval is **off by default**: select **Approve if confident** beside the upload button for newly uploaded invoices. Missing facts, low-confidence decisions, ambiguous addresses, extraction warnings, or unavailable delivery settings require review.
 
 ## Run locally
 
