@@ -411,8 +411,8 @@ public class TpfInvoiceAnalysisWorkflow {
                     .isPresent();
             return new DeliveryRetryResult.Rejected(
                     delivered
-                            ? "The saved delivery has no retained execution available for sending again. "
-                                    + "Sending again requires retained delivery execution state."
+                            ? "Automatic resend is unavailable after an app restart. "
+                                    + "Check Outlook Sent Items and send this invoice manually if needed."
                             : "This invoice does not have a successful delivery to reissue.");
         }
         var reissue = target.orElseThrow();
@@ -459,6 +459,11 @@ public class TpfInvoiceAnalysisWorkflow {
         }
     }
 
+    /** Read-only capability check; a page render must never claim or consume a resend. */
+    public boolean canReissueNotification(UUID documentId) {
+        return successfulDeliveryTarget(documentId).isPresent();
+    }
+
     private void pauseBeforeInteractionRetry() {
         pause(Duration.ofMillis(25));
     }
@@ -473,6 +478,12 @@ public class TpfInvoiceAnalysisWorkflow {
             }
             pause(Duration.ofMillis(25));
         } while (Instant.now().isBefore(deadline));
+        var retained = successfulDeliveryTarget(documentId);
+        retained.ifPresent(value -> executions.restoreSuccessfulDeliveryReissue(documentId, value));
+        return executions.claimSuccessfulDeliveryReissue(documentId);
+    }
+
+    private Optional<InvoiceExecutionTracker.ReissueTarget> successfulDeliveryTarget(UUID documentId) {
         // The tracker is only a live projection (and has a bounded cache). Command
         // authority and the current optimistic version must come from TPF.
         var approved =
@@ -488,10 +499,8 @@ public class TpfInvoiceAnalysisWorkflow {
                     .await()
                     .indefinitely();
             if (status.status() != ExecutionStatus.SUCCEEDED) return Optional.empty();
-            executions.restoreSuccessfulDeliveryReissue(
-                    documentId,
+            return Optional.of(
                     new InvoiceExecutionTracker.ReissueTarget(status.executionId(), status.version(), commandId));
-            return executions.claimSuccessfulDeliveryReissue(documentId);
         } catch (jakarta.ws.rs.NotFoundException expiredExecution) {
             return Optional.empty();
         }

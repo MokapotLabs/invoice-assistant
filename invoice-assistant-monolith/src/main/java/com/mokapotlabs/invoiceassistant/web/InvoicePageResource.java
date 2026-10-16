@@ -80,7 +80,8 @@ public class InvoicePageResource {
 
         static native TemplateInstance reviewQueue(InvoiceReviewQueueView queue);
 
-        static native TemplateInstance delivery(InvoiceReadModel record, String message, boolean confirmationPending);
+        static native TemplateInstance delivery(
+                InvoiceReadModel record, String message, boolean confirmationPending, boolean resendAvailable);
     }
 
     @CheckedTemplate(basePath = "fragments")
@@ -97,7 +98,7 @@ public class InvoicePageResource {
         static native TemplateInstance reviewQueue(InvoiceReviewQueueView queue);
 
         static native TemplateInstance deliveryStatus(
-                InvoiceReadModel record, String message, boolean confirmationPending);
+                InvoiceReadModel record, String message, boolean confirmationPending, boolean resendAvailable);
     }
 
     @GET
@@ -260,7 +261,8 @@ public class InvoicePageResource {
     public Response deliveryStatus(
             @PathParam("documentId") UUID documentId, @QueryParam("confirmationPending") boolean confirmationPending) {
         return facade.review(documentId)
-                .<Response>map(record -> Response.ok(Fragments.deliveryStatus(record, "", confirmationPending))
+                .<Response>map(record -> Response.ok(
+                                Fragments.deliveryStatus(record, "", confirmationPending, resendAvailable(record)))
                         .build())
                 .orElseGet(() -> Response.status(Response.Status.NOT_FOUND).build());
     }
@@ -324,7 +326,8 @@ public class InvoicePageResource {
     public Response delivery(
             @PathParam("documentId") UUID documentId, @QueryParam("confirmationPending") boolean confirmationPending) {
         return facade.review(documentId)
-                .<Response>map(record -> Response.ok(Templates.delivery(record, "", confirmationPending))
+                .<Response>map(record -> Response.ok(
+                                Templates.delivery(record, "", confirmationPending, resendAvailable(record)))
                         .build())
                 .orElseGet(() -> Response.status(Response.Status.NOT_FOUND).build());
     }
@@ -390,18 +393,19 @@ public class InvoicePageResource {
                         .build();
             }
             return facade.review(documentId)
-                    .<Response>map(record -> Response.ok(Fragments.deliveryStatus(record, "", false))
-                            .build())
+                    .<Response>map(
+                            record -> Response.ok(Fragments.deliveryStatus(record, "", false, resendAvailable(record)))
+                                    .build())
                     .orElseGet(() -> Response.status(Response.Status.NOT_FOUND).build());
         }
         String message = ((DeliveryRetryResult.Rejected) result).message();
         return facade.review(documentId)
                 .<Response>map(record -> isHtmx(htmxRequest)
                         ? Response.ok()
-                                .entity(Fragments.deliveryStatus(record, message, false))
+                                .entity(Fragments.deliveryStatus(record, message, false, resendAvailable(record)))
                                 .build()
                         : Response.status(Response.Status.CONFLICT)
-                                .entity(Templates.delivery(record, message, false))
+                                .entity(Templates.delivery(record, message, false, resendAvailable(record)))
                                 .build())
                 .orElseGet(() -> Response.status(Response.Status.NOT_FOUND).build());
     }
@@ -434,22 +438,33 @@ public class InvoicePageResource {
                         .build();
             }
             return facade.review(documentId)
-                    .<Response>map(record -> Response.ok(Fragments.deliveryStatus(record, "", false))
-                            .build())
+                    .<Response>map(
+                            record -> Response.ok(Fragments.deliveryStatus(record, "", false, resendAvailable(record)))
+                                    .build())
                     .orElseGet(() -> Response.status(Response.Status.NOT_FOUND).build());
         }
         String message = ((DeliveryRetryResult.Rejected) result).message();
         return deliveryConflict(documentId, message, htmxRequest);
     }
 
+    private boolean resendAvailable(InvoiceReadModel record) {
+        var status = record.deliveryState().notification().status();
+        return record.workflowFailure().isEmpty()
+                && (status == com.mokapotlabs.invoiceassistant.storage.DeliveryOperationStatus.SUCCEEDED
+                        || status
+                                == com.mokapotlabs.invoiceassistant.storage.DeliveryOperationStatus
+                                        .SUBMISSION_UNCERTAIN)
+                && facade.canReissueNotification(record.document().documentId());
+    }
+
     private Response deliveryConflict(UUID documentId, String message, String htmxRequest) {
         return facade.review(documentId)
                 .<Response>map(record -> isHtmx(htmxRequest)
                         ? Response.status(Response.Status.CONFLICT)
-                                .entity(Fragments.deliveryStatus(record, message, false))
+                                .entity(Fragments.deliveryStatus(record, message, false, resendAvailable(record)))
                                 .build()
                         : Response.status(Response.Status.CONFLICT)
-                                .entity(Templates.delivery(record, message, false))
+                                .entity(Templates.delivery(record, message, false, resendAvailable(record)))
                                 .build())
                 .orElseGet(() -> Response.status(Response.Status.NOT_FOUND).build());
     }

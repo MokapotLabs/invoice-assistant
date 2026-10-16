@@ -220,6 +220,55 @@ class InvoiceRecoveryTest {
         assertEquals(1, delivered.deliveryState().notification().attempts().size());
     }
 
+    @Test
+    @Order(12)
+    void lostResendAuthorityShowsManualHandlingAndRejectsStaleForms() throws Exception {
+        UUID documentId = admittedAndConfirmed("resend-after-restart.pdf", "restart resend fixture");
+        var delivered = awaitRecord(
+                documentId,
+                record -> record.deliveryState().notification().status() == DeliveryOperationStatus.SUCCEEDED
+                        && executions.state(documentId).isEmpty());
+        // Simulate a restarted process: business receipts survive, live and native
+        // effect authority are absent. This test never dispatches another email.
+        org.junit.jupiter.api.Assertions.assertTrue(
+                executions.claimSuccessfulDeliveryReissue(documentId).isPresent());
+        var emptyEffects = org.mockito.Mockito.mock(org.pipelineframework.command.InMemoryCommandEffectStore.class);
+        org.mockito.Mockito.when(emptyEffects.find(
+                        org.mockito.ArgumentMatchers.anyString(), org.mockito.ArgumentMatchers.anyString()))
+                .thenReturn(io.smallrye.mutiny.Uni.createFrom().item(java.util.Optional.empty()));
+        io.quarkus.test.junit.QuarkusMock.installMockForType(
+                emptyEffects, org.pipelineframework.command.CommandEffectStore.class);
+
+        var session = PayloadUploadFixture.session();
+        for (String path : new String[] {
+            "/invoices/" + documentId + "/delivery", "/fragments/invoices/" + documentId + "/delivery-status"
+        }) {
+            given().cookie("invoice-local-session", session)
+                    .get(path)
+                    .then()
+                    .statusCode(200)
+                    .body(containsString("Automatic resend is unavailable after an app restart."))
+                    .body(containsString("Outlook Sent Items"))
+                    .body(containsString("remove it from the inbox"))
+                    .body(not(containsString("SharePoint")))
+                    .body(not(containsString("Send invoice again")))
+                    .body(not(containsString("name=\"reason\"")));
+        }
+        given().cookie("invoice-local-session", session)
+                .header("HX-Request", "true")
+                .formParam("reason", "Old browser tab requested another copy")
+                .formParam("acknowledgePossibleDuplicate", "true")
+                .post("/invoices/" + documentId + "/delivery/reissue")
+                .then()
+                .statusCode(409)
+                .body(containsString("Automatic resend is unavailable after an app restart."))
+                .body(not(containsString("Send invoice again")));
+        var unchanged = facade.review(documentId).orElseThrow();
+        assertEquals(
+                delivered.reviewState().confirmation(), unchanged.reviewState().confirmation());
+        assertEquals(1, unchanged.deliveryState().notification().attempts().size());
+    }
+
     private AwaitInteractionRecord pendingInteraction(UUID documentId) throws InterruptedException {
         Instant deadline = Instant.now().plusSeconds(5);
         while (Instant.now().isBefore(deadline)) {

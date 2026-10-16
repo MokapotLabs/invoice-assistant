@@ -64,6 +64,7 @@
       </section>
     {/if}
     {#if record.workflowFailure.isEmpty && (record.deliveryState.notification.status.name == 'SUCCEEDED' || record.deliveryState.notification.status.name == 'SUBMISSION_UNCERTAIN')}
+      {#if resendAvailable}
       <details class="delivery-reissue"{#if message} open{/if}>
         <summary>Need to send this again?</summary>
         <form method="post" action="/invoices/{record.document.documentId}/delivery/reissue"
@@ -78,6 +79,10 @@
           <button type="submit">Send invoice again</button>
         </form>
       </details>
+      {#else}
+      <p class="delivery-reissue-note" role="note">Automatic resend is unavailable after an app restart.
+        Check Outlook Sent Items and send this invoice manually if needed. You can then remove it from the inbox.</p>
+      {/if}
     {/if}
   {/if}
 </section>

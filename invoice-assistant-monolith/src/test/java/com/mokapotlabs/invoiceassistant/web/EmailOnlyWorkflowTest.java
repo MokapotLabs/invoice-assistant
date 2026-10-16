@@ -81,6 +81,13 @@ class EmailOnlyWorkflowTest {
         // Lose the disposable projection, retaining native Command authority.
         waitFor(() -> executions.claimSuccessfulDeliveryReissue(id).isPresent());
         given().cookie("invoice-local-session", session)
+                .get("/fragments/invoices/" + id + "/delivery-status")
+                .then()
+                .statusCode(200)
+                .body(containsString("Send invoice again"))
+                .body(not(containsString("Automatic resend is unavailable")));
+
+        given().cookie("invoice-local-session", session)
                 .redirects()
                 .follow(false)
                 .formParam("reason", "Accountant requested another copy")

@@ -112,6 +112,10 @@ public class InvoiceAssistantFacade {
         return workflow.redriveAnalysis(documentId);
     }
 
+    public boolean canReissueNotification(UUID documentId) {
+        return workflow.canReissueNotification(documentId);
+    }
+
     public DeliveryRetryResult reissueNotification(UUID documentId, String reason) {
         return workflow.reissueNotification(documentId, reason);
     }

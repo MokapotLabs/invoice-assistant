@@ -8,6 +8,6 @@
         <button class="button button--danger" type="submit">× Remove from inbox</button>
       </form>
     </section>
-    {#include fragments/deliveryStatus record=record message=message confirmationPending=confirmationPending /}
+    {#include fragments/deliveryStatus record=record message=message confirmationPending=confirmationPending resendAvailable=resendAvailable /}
   {/body}
 {/include}
