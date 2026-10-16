@@ -54,7 +54,13 @@ class EmailOnlyWorkflowTest {
                         "accountant@example.test",
                         "Fixture email",
                         "PDF attached"));
-        waitFor(() -> history.history(id).delivery().isPresent());
+        waitFor(() -> history.history(id).delivery().isPresent()
+                && facade.review(id)
+                                .orElseThrow()
+                                .deliveryState()
+                                .notification()
+                                .status()
+                        == com.mokapotlabs.invoiceassistant.storage.DeliveryOperationStatus.SUCCEEDED);
         var audit = history.history(id);
         assertTrue(audit.confirmation().isPresent());
         assertEquals(1, audit.notificationOutcomes().size());
@@ -63,7 +69,12 @@ class EmailOnlyWorkflowTest {
                 .get("/invoices/" + id + "/delivery")
                 .then()
                 .statusCode(200)
-                .body(containsString("Accountant delivery"));
+                .body(containsString("Accountant delivery"))
+                .body(containsString("E-mail sent"))
+                .body(containsString("alert alert--success"))
+                .body(containsString("<details class=\"delivery-reissue\">"))
+                .body(containsString("Need to send this again?"))
+                .body(not(containsString("Fake accountant delivery accepted the PDF attachment.")));
     }
 
     @Test

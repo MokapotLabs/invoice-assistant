@@ -22,16 +22,21 @@
       <p>Confirm a property before starting delivery.</p>
     {/if}
   {#else}
+    {#if record.deliveryState.notification.status.name == 'SUCCEEDED'}
+      <p class="alert alert--success" role="status"><strong>E-mail sent</strong></p>
+    {/if}
     <p><strong>Canonical filename:</strong> {record.reviewState.confirmation.get.canonicalFilename}</p>
     <p><strong>Accountant delivery:</strong> PDF attachment</p>
 
 
     <section aria-label="Accountant delivery operation" class="operation-card">
       <h2>Accountant delivery</h2>
-      <p><strong>Status:</strong> <span class="status">{record.deliveryState.notification.displayStatus}</span></p>
+      <p><strong>Status:</strong> <span class="status">{#if record.deliveryState.notification.status.name == 'SUCCEEDED'}Success{#else}{record.deliveryState.notification.displayStatus}{/if}</span></p>
       {#if record.deliveryState.notification.attempts.size > 0}
-        <p>{record.deliveryState.notification.attempts.getLast.message}</p>
-        <ol>{#for attempt in record.deliveryState.notification.attempts}<li>Attempt {attempt.attemptNumber}: {attempt.status} — {attempt.message}</li>{/for}</ol>
+        {#if record.deliveryState.notification.attempts.getLast.status.name != 'SUCCEEDED'}
+          <p>{record.deliveryState.notification.attempts.getLast.message}</p>
+        {/if}
+        <ol>{#for attempt in record.deliveryState.notification.attempts}<li>Attempt {attempt.attemptNumber}: {attempt.status}{#if attempt.status.name != 'SUCCEEDED'} — {attempt.message}{/if}</li>{/for}</ol>
       {/if}
       {#if record.deliveryState.notification.status.name == 'EXTERNAL_SESSION_REQUIRED'}
         <p>Connect Outlook before starting a new delivery attempt. <a href="/outlook">Connect Outlook</a></p>
@@ -46,7 +51,21 @@
           <button type="submit">Retry accountant delivery</button>
         </form>
       {/if}
-      {#if record.workflowFailure.isEmpty && (record.deliveryState.notification.status.name == 'SUCCEEDED' || record.deliveryState.notification.status.name == 'SUBMISSION_UNCERTAIN')}
+
+    </section>
+
+    {#if record.deliveryState.inProgress}
+      <section aria-label="Delivery pending" class="operation-pending"
+               hx-get="/fragments/invoices/{record.document.documentId}/delivery-status"
+               hx-trigger="every 1s"
+               hx-target="#delivery-status"
+               hx-swap="outerHTML">
+        <p class="status status--warning">● Delivery is in progress.</p>
+      </section>
+    {/if}
+    {#if record.workflowFailure.isEmpty && (record.deliveryState.notification.status.name == 'SUCCEEDED' || record.deliveryState.notification.status.name == 'SUBMISSION_UNCERTAIN')}
+      <details class="delivery-reissue">
+        <summary>Need to send this again?</summary>
         <form method="post" action="/invoices/{record.document.documentId}/delivery/reissue"
               hx-post="/invoices/{record.document.documentId}/delivery/reissue"
               hx-target="#delivery-status" hx-swap="outerHTML">
@@ -58,17 +77,7 @@
           {/if}
           <button type="submit">Send invoice again</button>
         </form>
-      {/if}
-    </section>
-
-    {#if record.deliveryState.inProgress}
-      <section aria-label="Delivery pending" class="operation-pending"
-               hx-get="/fragments/invoices/{record.document.documentId}/delivery-status"
-               hx-trigger="every 1s"
-               hx-target="#delivery-status"
-               hx-swap="outerHTML">
-        <p class="status status--warning">● Delivery is in progress.</p>
-      </section>
+      </details>
     {/if}
   {/if}
 </section>

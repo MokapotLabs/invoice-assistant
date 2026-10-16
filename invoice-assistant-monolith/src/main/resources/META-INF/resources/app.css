@@ -102,3 +102,11 @@ legend { padding: 0 5px; color: var(--navy); font-weight: 750; font-size: .9rem;
 ol { padding-left: 20px; color: var(--muted); font-size: .86rem; } code { background: #eff6ff; color: #1d4ed8; padding: 2px 4px; border-radius: 4px; }
 
 @media (max-width: 760px) { .app-header__content, .app-main { width: min(100% - 28px, 1120px); }.page-heading, .app-header__content { align-items: stretch; flex-direction: column; }.page-heading .button { width: 100%; }.invoice-table { min-width: 720px; }.card--flush { overflow-x: auto; }.settings-grid, fieldset, .properties-grid fieldset { grid-template-columns: 1fr; }.browser-card { display: block; }.app-main { padding-top: 24px; } }
+
+.delivery-reissue { margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--line); }
+.delivery-reissue summary { color: var(--muted); cursor: pointer; font-size: .84rem; text-decoration: underline; text-underline-offset: 3px; }
+.delivery-reissue[open] summary { margin-bottom: 16px; }
+.delivery-reissue form { display: grid; gap: 10px; max-width: 540px; }
+.delivery-reissue button { justify-self: start; }
+.delivery-reissue label:has(input[type="checkbox"]) { display: flex; align-items: flex-start; gap: 8px; font-weight: 500; }
+.delivery-reissue input[type="checkbox"] { width: 17px; height: 17px; min-height: 17px; flex: 0 0 17px; padding: 0; accent-color: var(--blue); }
