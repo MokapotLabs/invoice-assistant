@@ -423,9 +423,10 @@ public class InvoicePageResource {
                                         .SUBMISSION_UNCERTAIN)
                         .orElse(false)
                 && !acknowledgePossibleDuplicate)
-            return Response.status(Response.Status.CONFLICT)
-                    .entity("Check Outlook Sent Items and acknowledge the possible duplicate before sending again.")
-                    .build();
+            return deliveryConflict(
+                    documentId,
+                    "Check Outlook Sent Items and acknowledge the possible duplicate before sending again.",
+                    htmxRequest);
         DeliveryRetryResult result = facade.reissueNotification(documentId, reason);
         if (result instanceof DeliveryRetryResult.Accepted) {
             if (!isHtmx(htmxRequest)) {
@@ -438,6 +439,10 @@ public class InvoicePageResource {
                     .orElseGet(() -> Response.status(Response.Status.NOT_FOUND).build());
         }
         String message = ((DeliveryRetryResult.Rejected) result).message();
+        return deliveryConflict(documentId, message, htmxRequest);
+    }
+
+    private Response deliveryConflict(UUID documentId, String message, String htmxRequest) {
         return facade.review(documentId)
                 .<Response>map(record -> isHtmx(htmxRequest)
                         ? Response.status(Response.Status.CONFLICT)

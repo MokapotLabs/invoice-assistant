@@ -403,7 +403,17 @@ public class TpfInvoiceAnalysisWorkflow {
         }
         var target = awaitSuccessfulDelivery(documentId);
         if (target.isEmpty()) {
-            return new DeliveryRetryResult.Rejected("This invoice does not have a successful delivery to reissue.");
+            var saved = history.find(documentId);
+            boolean delivered = saved.map(
+                            record -> record.deliveryState().notification().status())
+                    .filter(status -> status == DeliveryOperationStatus.SUCCEEDED
+                            || status == DeliveryOperationStatus.SUBMISSION_UNCERTAIN)
+                    .isPresent();
+            return new DeliveryRetryResult.Rejected(
+                    delivered
+                            ? "The saved delivery has no retained execution available for sending again. "
+                                    + "Sending again requires retained delivery execution state."
+                            : "This invoice does not have a successful delivery to reissue.");
         }
         var reissue = target.orElseThrow();
         var confirmation =
@@ -443,6 +453,7 @@ public class TpfInvoiceAnalysisWorkflow {
             return new DeliveryRetryResult.Accepted();
         } catch (RuntimeException failure) {
             executions.restoreSuccessfulDeliveryReissue(documentId, reissue);
+            LOG.log(System.Logger.Level.WARNING, "Invoice resend rejected for " + documentId, failure);
             String detail = InvoiceWorkflowFailure.safeDetail(failure, "The invoice could not be sent again.");
             return new DeliveryRetryResult.Rejected(detail);
         }
@@ -462,7 +473,28 @@ public class TpfInvoiceAnalysisWorkflow {
             }
             pause(Duration.ofMillis(25));
         } while (Instant.now().isBefore(deadline));
-        return Optional.empty();
+        // The tracker is only a live projection (and has a bounded cache). Command
+        // authority and the current optimistic version must come from TPF.
+        var approved =
+                history.find(documentId).flatMap(record -> record.reviewState().confirmation());
+        if (approved.isEmpty()) return Optional.empty();
+        String commandId =
+                DeliveryEffectIdentity.notification(approved.orElseThrow().reviewId());
+        var effect = effects.find(TENANT_ID, commandId).await().indefinitely();
+        if (effect.isEmpty() || effect.orElseThrow().status() != CommandEffectStatus.SUCCEEDED) return Optional.empty();
+        try {
+            var status = controlPlane
+                    .getExecutionStatus(TENANT_ID, effect.orElseThrow().executionId())
+                    .await()
+                    .indefinitely();
+            if (status.status() != ExecutionStatus.SUCCEEDED) return Optional.empty();
+            executions.restoreSuccessfulDeliveryReissue(
+                    documentId,
+                    new InvoiceExecutionTracker.ReissueTarget(status.executionId(), status.version(), commandId));
+            return executions.claimSuccessfulDeliveryReissue(documentId);
+        } catch (jakarta.ws.rs.NotFoundException expiredExecution) {
+            return Optional.empty();
+        }
     }
 
     private static Optional<ReviewReady> pendingReview(Object payload) {

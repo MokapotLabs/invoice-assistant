@@ -24,6 +24,9 @@ class EmailOnlyWorkflowTest {
     @Inject
     InvoiceHistoryQuery history;
 
+    @Inject
+    com.mokapotlabs.invoiceassistant.analysis.InvoiceExecutionTracker executions;
+
     @Test
     void manualConfirmationSendsAndPersistsOnlyEmailOutcome() throws Exception {
         var session = PayloadUploadFixture.session();
@@ -75,6 +78,17 @@ class EmailOnlyWorkflowTest {
                 .body(containsString("<details class=\"delivery-reissue\">"))
                 .body(containsString("Need to send this again?"))
                 .body(not(containsString("Fake accountant delivery accepted the PDF attachment.")));
+        // Lose the disposable projection, retaining native Command authority.
+        waitFor(() -> executions.claimSuccessfulDeliveryReissue(id).isPresent());
+        given().cookie("invoice-local-session", session)
+                .redirects()
+                .follow(false)
+                .formParam("reason", "Accountant requested another copy")
+                .post("/invoices/" + id + "/delivery/reissue")
+                .then()
+                .statusCode(303);
+        waitFor(() -> history.history(id).notificationOutcomes().size() == 2
+                && executions.state(id).isEmpty());
     }
 
     @Test

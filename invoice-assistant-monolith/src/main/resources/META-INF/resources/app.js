@@ -1,3 +1,14 @@
+// Delivery endpoints return a complete status fragment for an attended conflict.
+// HTMX normally discards 409 bodies, hiding the explanation from the user.
+document.addEventListener("htmx:beforeSwap", (event) => {
+  const detail = event.detail;
+  if (detail.xhr.status === 409 && detail.target?.id === "delivery-status"
+      && detail.xhr.responseText.trimStart().startsWith('<section id="delivery-status"')) {
+    detail.shouldSwap = true;
+    detail.isError = false;
+  }
+});
+
 document.addEventListener("DOMContentLoaded", () => {
   const preference = document.querySelector("[data-approval-preference]");
   let preferenceSave = Promise.resolve(true);

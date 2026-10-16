@@ -64,7 +64,7 @@
       </section>
     {/if}
     {#if record.workflowFailure.isEmpty && (record.deliveryState.notification.status.name == 'SUCCEEDED' || record.deliveryState.notification.status.name == 'SUBMISSION_UNCERTAIN')}
-      <details class="delivery-reissue">
+      <details class="delivery-reissue"{#if message} open{/if}>
         <summary>Need to send this again?</summary>
         <form method="post" action="/invoices/{record.document.documentId}/delivery/reissue"
               hx-post="/invoices/{record.document.documentId}/delivery/reissue"
