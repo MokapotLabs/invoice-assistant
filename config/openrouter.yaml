@@ -1,0 +1,23 @@
+# Runtime model bindings; operation identities match the compiled local pipeline.
+connectors:
+  invoice-analysis-model:
+    provider: llm.query.openai.compatible
+    version: 1
+    config:
+      model: google/gemini-3.1-flash-lite
+      baseUrl: https://openrouter.ai/api/v1
+      connection: openrouter-primary
+  invoice-vision-model:
+    provider: llm.query.openai.compatible
+    version: 1
+    config:
+      model: google/gemini-3.1-flash-lite
+      baseUrl: https://openrouter.ai/api/v1
+      connection: openrouter-primary
+  invoice-judgment-model:
+    provider: decision.query.jev
+    version: 1
+    config:
+      model: typesafe/jev-1.13
+      baseUrl: https://openrouter.ai/api/v1
+      connection: openrouter-primary

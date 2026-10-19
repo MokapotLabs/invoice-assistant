@@ -1,6 +1,6 @@
 # Invoice Assistant
 
-A local, attended invoice assistant for property managers. Upload one PDF or a batch, extract invoice details with Ollama, review the proposed property and email, and send the PDF to your accountant through a personal Outlook.com account.
+A local, attended invoice assistant for property managers. Upload one PDF or a batch, extract invoice details with Ollama or OpenRouter, review the proposed property and email, and send the PDF to your accountant through a personal Outlook.com account.
 
 The application is built on The Pipeline Framework **26.10.1-SNAPSHOT**. Its typed pipeline owns Queries, deferred confirmation, Commands, and the persisted audit trail. PDF upload and download use generated authenticated HTTP payload boundaries. Manual confirmation requests remain open for 30 days while the application stays running.
 
@@ -8,9 +8,14 @@ Automatic approval is **off by default**: select **Approve if confident** beside
 
 ## Run locally
 
-The first release supports **macOS**, Java **25**, and [Ollama 0.35 or newer](https://ollama.com/blog/ollama-now-supports-jev-style-decision-models). Outlook credentials persist in macOS Keychain; there is no plaintext fallback on other operating systems. Hardware must accommodate the configured models. `tev1` is experimental and its scores are not a guarantee of correctness.
+The first release supports **macOS** and Java **25**. The default local mode requires [Ollama 0.35 or newer](https://ollama.com/blog/ollama-now-supports-jev-style-decision-models); OpenRouter mode does not require Ollama. Outlook credentials persist in macOS Keychain; there is no plaintext fallback on other operating systems. In local mode, hardware must accommodate the configured models. `tev1` is experimental and decision scores are not a guarantee of correctness.
+
+### Ollama (default)
+
+Leave `OPENROUTER_API_KEY` unset or blank to keep all three models local:
 
 ```sh
+unset OPENROUTER_API_KEY
 ollama pull qwen3.5:4b
 ollama pull qwen3-vl:4b-instruct
 ollama pull tev1
@@ -23,7 +28,30 @@ java --enable-native-access=ALL-UNNAMED \
 
 Open <http://127.0.0.1:8080/setup>. Configure property addresses, an accountant recipient, and the email templates. The starter recipient is intentionally empty. Open [Connect Outlook](http://127.0.0.1:8080/outlook) and complete Microsoft's device-code sign-in. After setup, use **Catalogue** for properties and filename settings, and **Recipient** for email delivery settings. No client secret is needed. The local session cookie is issued by the attended loopback UI. Data is stored under `~/.invoice-assistant`, separately from source. To customize or add properties, stop the application and edit `~/.invoice-assistant/config/settings.yaml`; identifiers must be unique. The form edits existing properties.
 
-Text extraction uses `qwen3.5:4b`, supplier image fallback uses `qwen3-vl:4b-instruct`, and the bounded supplier/property decision uses local `tev1` through Ollama's `/v1/systemone` protocol. Models and addresses are declared in `config/pipeline.yaml`. Keep the decision endpoint's base URL at `http://localhost:11434`. All invoice AI analysis runs locally with these defaults. Sending email and Microsoft authentication require the internet; approved invoice PDFs are sent to Microsoft and the configured recipient.
+Text extraction uses `qwen3.5:4b`, supplier image fallback uses `qwen3-vl:4b-instruct`, and the bounded supplier/property decision uses local `tev1`. Text and images use Ollama's [OpenAI-compatible endpoint](https://docs.ollama.com/api/openai-compatibility) at `http://localhost:11434/v1`; decisions use `/v1/systemone`, with the decision binding's base URL at `http://localhost:11434`. Local model bindings are declared in `config/pipeline.yaml`. All AI analysis stays local in this mode. Sending email and Microsoft authentication still require the internet; approved invoice PDFs are sent to Microsoft and the configured recipient.
+
+### OpenRouter (optional)
+
+Set a nonblank `OPENROUTER_API_KEY` in the environment of the application process. The same build automatically switches **all three** model bindings when it starts; Ollama and local model downloads are unnecessary:
+
+```sh
+./mvnw package
+export OPENROUTER_API_KEY=your-openrouter-api-key
+export INVOICE_ASSISTANT_GRAPH_CLIENT_ID=your-public-client-application-id
+java --enable-native-access=ALL-UNNAMED \
+  -Dinvoice-assistant.http.port=8080 \
+  -jar invoice-assistant-monolith/target/quarkus-app/quarkus-run.jar
+```
+
+| Query | Ollama default | OpenRouter |
+| --- | --- | --- |
+| Invoice text | `qwen3.5:4b` | `google/gemini-3.1-flash-lite` |
+| Supplier images/logos | `qwen3-vl:4b-instruct` | `google/gemini-3.1-flash-lite` |
+| Supplier/property decision | `tev1` | `typesafe/jev-1.13` |
+
+The OpenRouter defaults use [Gemini Flash Lite](https://openrouter.ai/google/gemini-3.1-flash-lite) for extraction and vision, and [Jev](https://openrouter.ai/typesafe/jev-1.13) for the bounded decision. Their non-secret bindings are declared in `config/openrouter.yaml`. Changing model declarations requires rebuilding; switching between the two packaged configurations only requires restarting the app. Unset the key and restart to return to Ollama.
+
+OpenRouter mode sends invoice text, relevant catalogue details, and any supplier images used by the vision fallback to OpenRouter and its model providers. Internet access and sufficient OpenRouter credit are required. Credentials stay in the process environment and authenticated host connections; the app never writes the key to its runtime pipeline YAML. Do not commit it or put it in a launch command's arguments. An invalid key or a provider failure is reported as an analysis failure; the app does not silently fall back to local models.
 
 ## Outlook registration
 

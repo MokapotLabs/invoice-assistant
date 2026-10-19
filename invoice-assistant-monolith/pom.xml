@@ -103,7 +103,7 @@
     <build>
         <resources>
             <resource><directory>src/main/resources</directory></resource>
-            <resource><directory>../config</directory><includes><include>pipeline.yaml</include></includes><targetPath>invoice-config</targetPath></resource>
+            <resource><directory>../config</directory><includes><include>pipeline.yaml</include><include>openrouter.yaml</include></includes><targetPath>invoice-config</targetPath></resource>
         </resources>
         <plugins>
             <plugin>

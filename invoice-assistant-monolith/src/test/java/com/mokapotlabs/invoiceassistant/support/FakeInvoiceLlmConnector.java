@@ -27,6 +27,10 @@ public final class FakeInvoiceLlmConnector extends LlmQueryConnectorProvider {
     private static final AtomicReference<LlmTurnRequest> LAST_REQUEST = new AtomicReference<>();
     private static final java.util.Set<String> FAILED_ONCE = ConcurrentHashMap.newKeySet();
 
+    public FakeInvoiceLlmConnector() {
+        super(org.pipelineframework.connector.ConnectorProviderId.of("llm.query.openai.compatible"));
+    }
+
     public static int calls() {
         return CALLS.get();
     }

@@ -5,17 +5,19 @@ transport: LOCAL
 platform: COMPUTE
 connectors:
   invoice-analysis-model:
-    provider: llm.query
+    provider: llm.query.openai.compatible
     version: 1
     config:
       model: qwen3.5:4b
-      baseUrl: http://localhost:11434
+      baseUrl: http://localhost:11434/v1
+      connection: ollama
   invoice-vision-model:
-    provider: llm.query
+    provider: llm.query.openai.compatible
     version: 1
     config:
       model: qwen3-vl:4b-instruct
-      baseUrl: http://localhost:11434
+      baseUrl: http://localhost:11434/v1
+      connection: ollama
   invoice-judgment-model:
     provider: decision.query.jev
     version: 1

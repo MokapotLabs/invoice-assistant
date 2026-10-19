@@ -4,7 +4,7 @@ Target repository: **MokapotLabs/invoice-assistant**. This is an email-only adap
 
 ## Source and history
 
-The export was created from an explicit source allowlist in a separate directory. No previous `.git` directory, commit history, tags, object alternates, runtime data, mailbox caches, invoice PDFs, production configuration, private audit notes, unrelated applications, or old installers were copied. Legacy external browser automation and remote AI configuration are absent from every public commit. Only fictional starter addresses and example recipients remain. The starter accountant recipient is empty and automatic approval is off.
+The export was created from an explicit source allowlist in a separate directory. No previous `.git` directory, commit history, tags, object alternates, runtime data, mailbox caches, invoice PDFs, production configuration, private audit notes, unrelated applications, or old installers were copied. Legacy external browser automation is absent from the public history. The initial export omitted remote AI configuration; optional, generic OpenRouter bindings were added subsequently as documented below. Only fictional starter addresses and example recipients remain. The starter accountant recipient is empty and automatic approval is off.
 
 The new history uses the actual current dates and a public GitHub no-reply author address. Commits introduce the build/contracts, complete typed email application, test/setup documentation, and the unmatched-property safety correction. They do not represent an invented development chronology or a claim of challenge eligibility. One fresh root commit anchors the history; no private ancestors or shared object storage exist.
 
@@ -33,3 +33,12 @@ The application source includes the subsequent catalogue/recipient split, opt-in
 - `docs/source-manifest.sha256` was regenerated for the tracked source and documentation, excluding the manifest itself. Apache-2.0 licensing and the original public author attribution are retained.
 
 This verification publishes source, not a binary release. It does not claim complete transitive dependency licensing or vulnerability assessment, or challenge eligibility.
+
+## Optional OpenRouter verification — 2026-10-19
+
+Ollama remains the default for all three AI Queries. A nonblank `OPENROUTER_API_KEY` now selects the packaged OpenRouter bindings for text, supplier images and bounded decisions together at startup. Credentials remain outside the runtime YAML. Both deployments keep the compiled connector operation identities unchanged.
+
+- Java 25 `clean verify` passed: 38 tests, zero failures or errors, with the optional macOS Keychain fixture skipped.
+- Loopback HTTP fixtures exercised the real pinned text/image Query operation and streaming SDK in both modes, including strict structured output, image bytes, local versus remote authentication and local thinking controls. The pinned decision client exercised both Ollama `/v1/systemone` and OpenRouter `/api/alpha/decisions` routing with bounded answers.
+- The packaged application started in isolated data storage without a key, with a synthetic nonblank key, and again with a blank key. All three runtime bindings selected the expected deployment on each restart, and no credential was written to the runtime pipeline YAML. Each temporary application was stopped after verification.
+- No live OpenRouter request or real email was sent by these checks. Documentation covers both modes and the external data processing and usage charges of OpenRouter mode. The source manifest was refreshed for the changed source and documentation.
