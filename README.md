@@ -61,4 +61,7 @@ The initial local decision configuration supports up to **25 enabled properties*
 Expired and restarted reviews resume their saved analysis and checksum-verified original catalogue when confirmed,
 without another LLM call or reapplying automatic approval. Approved invoices lead to delivery and repeated confirmation
 submissions leave the approved message unchanged. When the previous execution is unavailable, recovery requires
-checking Outlook Sent Items and accepting a possible duplicate. Native command retry/reissue retains effect authority.
+checking Outlook Sent Items and accepting a possible duplicate. Automatic resend is offered only while TPF retains
+the successful execution and Command records. After an app restart with the default memory stores, the delivery page
+shows manual-handling guidance when resend is unavailable. Removing an invoice from the inbox keeps its files,
+audit history and duplicate detection.

@@ -1,6 +1,6 @@
 # Public export audit — 2026-10-13
 
-Target repository: **MokapotLabs/invoice-assistant**. This is an email-only adaptation of an existing local application, licensed under Apache-2.0. It is prepared locally and has not been published to GitHub.
+Target repository: **MokapotLabs/invoice-assistant**. This is an email-only adaptation of an existing local application, licensed under Apache-2.0. The initial export audit was recorded on 2026-10-13; publication verification is recorded below.
 
 ## Source and history
 
@@ -19,6 +19,17 @@ Gitleaks **8.30.1**, with redacted output, reported zero credential findings acr
 - A synthetic PDF completed the packaged real local extraction and decision flow in 111 seconds and reached deferred review, with no confirmation or notification outcome. This verifies the local path; it is not an accuracy benchmark.
 - Tests cover owned upload/download, owner rejection, changed PDF bytes, metadata mismatch, recipient allowlisting, attachment limits, Graph acceptance, revoked authorization, uncertain non-retryable submission, disconnect cache removal, opt-in approval, opt-out review, carried decision identity and manual email-only completion.
 
-Microsoft OAuth consent and real email delivery were not exercised: those require an app registration and an explicitly chosen test mailbox. All automated mail tests used a loopback server and synthetic content. No customer invoice or real token was used. The protected token-cache implementation currently supports macOS only.
+The automated audit does not exercise Microsoft OAuth consent or real email delivery; those require an app registration and an explicitly chosen test mailbox. All automated mail tests used a loopback server and synthetic content. No customer invoice or real token was used. The protected token-cache implementation currently supports macOS only.
 
 The application's main execution/capture/effect stores are in memory; its invoice audit tables persist in local H2. A crash during an external send can leave an unobserved outcome. Check Outlook before deliberately recreating or resending an interrupted invoice. Full transitive dependency licensing and vulnerability assessment remains a separate step before distributing binaries; this audit covers source sanitisation, history isolation and behavior verification.
+
+## Publication verification — 2026-10-19
+
+The application source includes the subsequent catalogue/recipient split, opt-in approval layout, review and interrupted-delivery recovery, and explicit manual-handling guidance when resend is unavailable after a restart. The local defaults remain email-only Graph delivery and Ollama analysis, with no durable storage added.
+
+- `./mvnw -U verify` passed with Java 25 and an initially empty, isolated Maven repository. Framework dependencies resolved from the public snapshot repository, and the runnable Quarkus package was produced. All 30 tests completed with zero failures or errors; the opt-in macOS Keychain fixture was skipped.
+- Gitleaks 8.30.1, downloaded from its official release and checked against its published SHA-256 checksum, reported zero credential findings across the complete public history. An explicit scan of historical blobs found no retained private hostnames, personal filesystem paths, private app-registration identifiers, removed integration implementations, or non-example recipient addresses.
+- The public history has one independent root, no commits shared with the private application's history, and no Git object alternates. Only the public `main` branch is selected for publication; private application history, runtime data, demo PDFs, token caches, and generated build output are excluded.
+- `docs/source-manifest.sha256` was regenerated for the tracked source and documentation, excluding the manifest itself. Apache-2.0 licensing and the original public author attribution are retained.
+
+This verification publishes source, not a binary release. It does not claim complete transitive dependency licensing or vulnerability assessment, or challenge eligibility.
