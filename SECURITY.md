@@ -9,3 +9,5 @@ Microsoft tokens use native macOS Keychain APIs. The application uses a public c
 Use GitHub's private vulnerability reporting for this repository when available. Do not attach invoice PDFs, token caches, environment files or unredacted logs to public issues.
 
 Automatic approval is optional, conservative, and not an accounting guarantee. Review unfamiliar suppliers and property configurations. An uncertain email outcome requires checking Outlook before a deliberate new send.
+
+AI analysis defaults to local Ollama. A nonblank `OPENROUTER_API_KEY` selects OpenRouter for text, image and bounded-decision Queries at startup. This sends invoice evidence and relevant catalogue details to OpenRouter and its providers and can incur usage charges. The key stays in the host environment/authenticated connections, outside generated or persisted pipeline configuration. Never attach it to public issues or enable request/header logging with real credentials. Unset the key and restart to restore local analysis.

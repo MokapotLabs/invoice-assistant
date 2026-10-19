@@ -3,23 +3,32 @@ package org.pipelineframework.connector.decision.jev;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mokapotlabs.assistantlocal.connection.AiConnectionResolver;
 import com.sun.net.httpserver.HttpServer;
 import java.net.InetSocketAddress;
-import java.net.http.HttpClient;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
+import org.pipelineframework.connector.*;
 import org.pipelineframework.connector.decision.*;
 
 /** Application integration contract against the pinned, unmodified provider client. */
 class OllamaDecisionProtocolTest {
     @Test
     void pinnedProviderUsesNativeSystemoneAndDecodesBoundedChoices() throws Exception {
+        verify(false);
+        verify(true);
+    }
+
+    private void verify(boolean remote) throws Exception {
         var observed = new AtomicReference<String>();
+        var authorization = new AtomicReference<String>();
         var server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
-        server.createContext("/v1/systemone", exchange -> {
+        server.createContext(remote ? "/api/alpha/decisions" : "/v1/systemone", exchange -> {
+            authorization.set(exchange.getRequestHeaders().getFirst("Authorization"));
             observed.set(new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8));
             byte[] reply =
                     """
@@ -31,13 +40,17 @@ class OllamaDecisionProtocolTest {
             exchange.close();
         });
         server.start();
-        try (var http = HttpClient.newBuilder()
-                .followRedirects(HttpClient.Redirect.NEVER)
-                .build()) {
+        try {
             var client = new JevDecisionClient(
-                    AuthenticatedJevConnection.bearer(http, "ollama"),
-                    "http://127.0.0.1:" + server.getAddress().getPort(),
-                    "tev1",
+                    new AiConnectionResolver(() -> Optional.of(" fixture-key "))
+                            .resolve(new ConnectionResolutionRequest<>(
+                                    new ConnectionRef(remote ? "openrouter-primary" : "ollama-decision"),
+                                    AuthenticatedJevConnection.class,
+                                    ConnectorExecutionContext.empty()))
+                            .toCompletableFuture()
+                            .join(),
+                    "http://127.0.0.1:" + server.getAddress().getPort() + (remote ? "/api/v1" : ""),
+                    remote ? "typesafe/jev-1.13" : "tev1",
                     Duration.ofSeconds(3));
             var response = client.decide(new DecisionRequest(
                             "{\"invoiceText\":\"17 Maple Street\"}",
@@ -52,7 +65,9 @@ class OllamaDecisionProtocolTest {
                     .join();
             assertEquals("maple", response.result().answers().getFirst().selected());
             var body = new ObjectMapper().readTree(observed.get());
-            assertEquals("tev1", body.path("model").asText());
+            assertEquals(
+                    remote ? "typesafe/jev-1.13" : "tev1", body.path("model").asText());
+            assertEquals(remote ? "Bearer fixture-key" : "Bearer ollama", authorization.get());
             assertEquals("choice", body.at("/questions/property/type").asText());
             assertTrue(body.at("/questions/property/criteria").has("maple"));
             assertFalse(body.has("messages"));

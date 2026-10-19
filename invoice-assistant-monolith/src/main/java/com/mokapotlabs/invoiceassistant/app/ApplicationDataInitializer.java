@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
+import java.util.Map;
+import java.util.Optional;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 @ApplicationScoped
@@ -64,6 +66,7 @@ public class ApplicationDataInitializer {
             var yaml = new org.yaml.snakeyaml.Yaml(
                     new org.yaml.snakeyaml.constructor.SafeConstructor(new org.yaml.snakeyaml.LoaderOptions()));
             java.util.Map<String, Object> root = yaml.load(input);
+            configureAiModels(root, Optional.ofNullable(System.getenv("OPENROUTER_API_KEY")));
             for (String boundary : java.util.List.of("publish", "sources")) {
                 @SuppressWarnings("unchecked")
                 var objects = (java.util.Map<String, Object>) root.get(boundary);
@@ -76,6 +79,31 @@ public class ApplicationDataInitializer {
             Path runtimeConfig = configuration.dataRoot().resolve("runtime/pipeline.yaml");
             Files.writeString(runtimeConfig, new org.yaml.snakeyaml.Yaml().dump(root));
             System.setProperty("pipeline.config", runtimeConfig.toString());
+        }
+    }
+
+    /** Select all model bindings together; credentials never enter the persisted runtime YAML. */
+    static void configureAiModels(Map<String, Object> root, Optional<String> apiKey) throws IOException {
+        if (apiKey.filter(value -> !value.isBlank()).isEmpty()) return;
+        try (var input = ApplicationDataInitializer.class.getResourceAsStream("/invoice-config/openrouter.yaml")) {
+            if (input == null) throw new IOException("Packaged OpenRouter configuration is unavailable.");
+            var yaml = new org.yaml.snakeyaml.Yaml(
+                    new org.yaml.snakeyaml.constructor.SafeConstructor(new org.yaml.snakeyaml.LoaderOptions()));
+            Map<String, Object> overlay = yaml.load(input);
+            @SuppressWarnings("unchecked")
+            var bindings = (Map<String, Object>) root.get("connectors");
+            @SuppressWarnings("unchecked")
+            var replacements = (Map<String, Map<String, Object>>) overlay.get("connectors");
+            for (var entry : replacements.entrySet()) {
+                @SuppressWarnings("unchecked")
+                var compiled = (Map<String, Object>) bindings.get(entry.getKey());
+                if (!compiled.get("provider").equals(entry.getValue().get("provider"))
+                        || !compiled.get("version").equals(entry.getValue().get("version"))) {
+                    throw new IOException(
+                            "Model provider identity differs from the compiled pipeline: " + entry.getKey());
+                }
+            }
+            bindings.putAll(replacements);
         }
     }
 
