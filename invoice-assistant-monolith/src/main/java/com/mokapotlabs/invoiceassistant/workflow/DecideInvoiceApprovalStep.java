@@ -10,6 +10,7 @@ import com.mokapotlabs.invoiceassistant.domain.InvoiceReview;
 import com.mokapotlabs.invoiceassistant.domain.Property;
 import com.mokapotlabs.invoiceassistant.domain.ReviewReady;
 import com.mokapotlabs.invoiceassistant.domain.SupplierEvidenceStatus;
+import com.mokapotlabs.invoiceassistant.interaction.PropertyConfirmationRequest;
 import com.mokapotlabs.invoiceassistant.interaction.SubmittedConfirmation;
 import io.quarkus.arc.Unremovable;
 import io.smallrye.mutiny.Uni;
@@ -28,7 +29,8 @@ public class DecideInvoiceApprovalStep implements ReactiveService<ReviewReady, I
     }
 
     InvoiceApprovalRoute decide(ReviewReady review) {
-        if (review.evidence().isEmpty()) return review;
+        if (review.evidence().isEmpty())
+            return new InvoiceApprovalRoute.Manual(new PropertyConfirmationRequest(review));
         InvoiceEvidence evidence = review.evidence().orElseThrow();
         AutoApprovalPolicy policy = evidence.approvalPolicy();
         InvoiceFacts facts = review.review().facts();
@@ -41,23 +43,25 @@ public class DecideInvoiceApprovalStep implements ReactiveService<ReviewReady, I
                 || !facts.diagnostic().equalsIgnoreCase("No extraction warnings.")
                 || !contains(evidence.text(), facts.supplier())
                 || !contains(evidence.text(), facts.invoiceNumber())
-                || !contains(evidence.text(), facts.totalAmount().toPlainString())) return review;
+                || !contains(evidence.text(), facts.totalAmount().toPlainString()))
+            return new InvoiceApprovalRoute.Manual(new PropertyConfirmationRequest(review));
         var matches = review.properties().stream()
                 .filter(property -> Stream.concat(Stream.of(property.canonicalAddress()), property.aliases().stream())
                         .filter(address ->
                                 address.length() >= 8 && address.chars().anyMatch(Character::isDigit))
                         .anyMatch(address -> contains(evidence.text(), address)))
                 .toList();
-        if (matches.size() != 1) return review;
+        if (matches.size() != 1) return new InvoiceApprovalRoute.Manual(new PropertyConfirmationRequest(review));
         Property property = matches.getFirst();
-        if (!property.id().equals(review.review().recommendation().propertyId())) return review;
+        if (!property.id().equals(review.review().recommendation().propertyId()))
+            return new InvoiceApprovalRoute.Manual(new PropertyConfirmationRequest(review));
         var delivery = policy.deliveries().stream()
                 .filter(item -> item.propertyId().equals(property.id())
                         && item.ready()
                         && item.recipient().contains("@")
                         && !item.recipient().endsWith(".invalid"))
                 .findFirst();
-        if (delivery.isEmpty()) return review;
+        if (delivery.isEmpty()) return new InvoiceApprovalRoute.Manual(new PropertyConfirmationRequest(review));
         var reference = review.invoice();
         var document = new InvoiceDocument(
                 review.documentId(),
@@ -76,7 +80,8 @@ public class DecideInvoiceApprovalStep implements ReactiveService<ReviewReady, I
                 delivery.orElseThrow().recipient(),
                 render(policy.subjectTemplate(), property, filename, review.review()),
                 render(policy.bodyTemplate(), property, filename, review.review()));
-        return PropertyConfirmationProjector.confirm(review, submission, policy.admittedAt());
+        return new InvoiceApprovalRoute.Automatic(
+                PropertyConfirmationProjector.confirm(review, submission, policy.admittedAt()));
     }
 
     private static String render(String template, Property property, String filename, InvoiceReview review) {

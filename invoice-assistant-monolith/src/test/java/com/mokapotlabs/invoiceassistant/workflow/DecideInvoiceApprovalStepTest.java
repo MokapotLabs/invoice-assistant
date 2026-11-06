@@ -22,7 +22,8 @@ class DecideInvoiceApprovalStepTest {
                 true,
                 true,
                 List.of(PROPERTY));
-        var result = assertInstanceOf(CompletedConfirmation.class, step.decide(input));
+        var result = assertInstanceOf(InvoiceApprovalRoute.Automatic.class, step.decide(input))
+                .value();
         assertEquals("chosen", result.confirmedInvoice().confirmedPropertyId());
         assertEquals("accountant@example.test", result.confirmedInvoice().emailRecipient());
         assertEquals("Invoice chosen", result.confirmedInvoice().emailSubject());
@@ -82,7 +83,11 @@ class DecideInvoiceApprovalStepTest {
                         true,
                         true,
                         List.of(PROPERTY)))) {
-            assertSame(input, step.decide(input));
+            assertSame(
+                    input,
+                    assertInstanceOf(InvoiceApprovalRoute.Manual.class, step.decide(input))
+                            .value()
+                            .review());
         }
     }
 

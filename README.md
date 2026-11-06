@@ -2,9 +2,23 @@
 
 A local, attended invoice assistant for property managers. Upload one PDF or a batch, extract invoice details with Ollama or OpenRouter, review the proposed property and email, and send the PDF to your accountant through a personal Outlook.com account.
 
-The application is built on The Pipeline Framework **26.10.1-SNAPSHOT**. Its typed pipeline owns Queries, deferred confirmation, Commands, and the persisted audit trail. PDF upload and download use generated authenticated HTTP payload boundaries. Manual confirmation requests remain open for 30 days while the application stays running.
+The application uses The Pipeline Framework BOM **26.11.1**. Its typed pipeline owns Queries, deferred confirmation, Commands, and the persisted audit trail. PDF upload and download use generated authenticated HTTP payload boundaries. Manual confirmation requests remain open for 30 days while the application stays running.
 
 Automatic approval is **off by default**: select **Approve if confident** beside the upload button for newly uploaded invoices. Missing facts, low-confidence decisions, ambiguous addresses, extraction warnings, or unavailable delivery settings require review.
+
+## Typed flow and dependency versions
+
+Text analysis and judgement run in the named `text-analysis` definition, then return
+`TextAnalysisResult` to the caller for supplier routing. Approval policy owns selective
+Await: `PropertyConfirmationRequest` suspends for manual confirmation, while automatic
+`CompletedConfirmation` values continue directly to the Outlook Command. There is no
+pass-through confirmation service. Persistence remains aspect-owned.
+
+The BOM selects compatible versions independently: compiler/runtime 26.11.1 and
+connectors 26.10.1. Dependencies and annotation processor paths use its management.
+BOM 26.11.1 omits the two decision connectors and file representation provider used by
+this application, so the parent centrally pins only those artifacts to their released
+26.10.1 version. No TPF snapshot repository is required.
 
 ## Run locally
 

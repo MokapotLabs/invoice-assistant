@@ -24,7 +24,8 @@
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.version>3.39.2</quarkus.platform.version>
-        <tpf.version>26.10.1-SNAPSHOT</tpf.version>
+        <tpf.bom.version>26.11.1</tpf.bom.version>
+        <tpf.connectors.version>26.10.1</tpf.connectors.version>
         <maven.compiler-plugin.version>3.14.0</maven.compiler-plugin.version>
         <maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>
         <spotless.version>2.44.3</spotless.version>
@@ -34,6 +35,29 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>org.pipelineframework</groupId>
+                <artifactId>pipelineframework-bom</artifactId>
+                <version>${tpf.bom.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- These connector artifacts are released with the connector set, but are not listed in BOM 26.11.1. -->
+            <dependency>
+                <groupId>org.pipelineframework</groupId>
+                <artifactId>decision-query-connector</artifactId>
+                <version>${tpf.connectors.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.pipelineframework</groupId>
+                <artifactId>decision-query-jev-connector</artifactId>
+                <version>${tpf.connectors.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.pipelineframework</groupId>
+                <artifactId>representation-provider-file</artifactId>
+                <version>${tpf.connectors.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>${quarkus.platform.group-id}</groupId>
                 <artifactId>${quarkus.platform.artifact-id}</artifactId>
                 <version>${quarkus.platform.version}</version>
@@ -42,21 +66,6 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <repositories>
-        <repository>
-            <id>central-portal-snapshots</id>
-            <name>Central Portal Snapshots</name>
-            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-                <updatePolicy>always</updatePolicy>
-            </snapshots>
-        </repository>
-    </repositories>
 
     <build>
         <pluginManagement>
