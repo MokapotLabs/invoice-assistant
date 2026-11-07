@@ -13,7 +13,6 @@
         <dependency>
             <groupId>org.pipelineframework</groupId>
             <artifactId>pipelineframework</artifactId>
-            <version>${tpf.version}</version>
         </dependency>
     </dependencies>
 </project>

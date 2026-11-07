@@ -68,6 +68,7 @@ class ApplicationModelConfigurationTest {
                 "openrouter-primary");
         assertFalse(new Yaml().dump(pipeline).contains("fixture-secret-never-persist"));
         assertEquals(original.get("steps"), pipeline.get("steps"));
+        assertEquals(original.get("pipelines"), pipeline.get("pipelines"));
         assertEquals(original.get("publish"), pipeline.get("publish"));
         // Returning to local mode starts from the packaged defaults, never the previous runtime YAML.
         var restarted = pipeline();

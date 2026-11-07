@@ -9,8 +9,8 @@
     </parent>
     <artifactId>invoice-payload-boundaries</artifactId>
     <dependencies>
-        <dependency><groupId>org.pipelineframework</groupId><artifactId>object-ingest-connector</artifactId><version>${tpf.version}</version></dependency>
-        <dependency><groupId>org.pipelineframework</groupId><artifactId>pipelineframework</artifactId><version>${tpf.version}</version></dependency>
+        <dependency><groupId>org.pipelineframework</groupId><artifactId>object-ingest-connector</artifactId></dependency>
+        <dependency><groupId>org.pipelineframework</groupId><artifactId>pipelineframework</artifactId></dependency>
         <dependency><groupId>io.quarkus</groupId><artifactId>quarkus-rest-jackson</artifactId></dependency>
         <dependency><groupId>org.eclipse.microprofile.openapi</groupId><artifactId>microprofile-openapi-api</artifactId><version>4.1.1</version></dependency>
     </dependencies>
@@ -20,8 +20,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <annotationProcessorPaths>
-                        <path><groupId>org.pipelineframework</groupId><artifactId>pipelineframework-compiler</artifactId><version>${tpf.version}</version></path>
-                        <path><groupId>org.pipelineframework</groupId><artifactId>object-ingest-connector</artifactId><version>${tpf.version}</version></path>
+                        <path><groupId>org.pipelineframework</groupId><artifactId>pipelineframework-compiler</artifactId></path>
+                        <path><groupId>org.pipelineframework</groupId><artifactId>object-ingest-connector</artifactId></path>
                     </annotationProcessorPaths>
                 </configuration>
                 <executions>

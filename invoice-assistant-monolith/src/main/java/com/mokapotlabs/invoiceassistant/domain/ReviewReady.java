@@ -18,7 +18,7 @@ public record ReviewReady(
         List<Property> properties,
         InvoiceReview review,
         Optional<InvoiceEvidence> evidence)
-        implements AnalysisRoute, InvoiceApprovalRoute, InvoiceEntry {
+        implements AnalysisRoute, InvoiceEntry {
     public ReviewReady(
             UUID reviewId,
             UUID documentId,
