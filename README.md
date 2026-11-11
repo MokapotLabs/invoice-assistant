@@ -2,7 +2,7 @@
 
 A local, attended invoice assistant for property managers. Upload one PDF or a batch, extract invoice details with Ollama or OpenRouter, review the proposed property and email, and send the PDF to your accountant through a personal Outlook.com account.
 
-The application uses The Pipeline Framework BOM **26.11.2-SNAPSHOT**. Its typed pipeline owns Queries, deferred confirmation, Commands, and the persisted audit trail. PDF upload and download use generated authenticated HTTP payload boundaries. Manual confirmation requests remain open for 30 days while the application stays running.
+The application uses The Pipeline Framework BOM **26.11.2**. Its typed pipeline owns Queries, deferred confirmation, Commands, and the persisted audit trail. PDF upload and download use generated authenticated HTTP payload boundaries. Manual confirmation requests remain open for 30 days while the application stays running.
 
 Automatic approval is **off by default**: select **Approve if confident** beside the upload button for newly uploaded invoices. Missing facts, low-confidence decisions, ambiguous addresses, extraction warnings, or unavailable delivery settings require review.
 
@@ -15,10 +15,8 @@ Await: `PropertyConfirmationRequest` suspends for manual confirmation, while aut
 pass-through confirmation service. Persistence remains aspect-owned.
 
 The product BOM selects compatible component versions independently. Dependencies and
-annotation processor paths obtain all TPF artifact versions from its management; no
-connector-specific overrides are needed. The parent POM enables the Central snapshot
-repository and refreshes snapshot metadata. Use `./mvnw -U verify` to validate against
-freshly published snapshots.
+annotation processor paths take their TPF artifact versions from the BOM. Use
+`./mvnw verify` to build and test against the pinned release from Maven Central.
 
 ## Run locally
 

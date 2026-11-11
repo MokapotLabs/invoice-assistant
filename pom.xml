@@ -24,7 +24,7 @@
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.version>3.39.2</quarkus.platform.version>
-        <tpf.bom.version>26.11.2-SNAPSHOT</tpf.bom.version>
+        <tpf.bom.version>26.11.2</tpf.bom.version>
         <maven.compiler-plugin.version>3.14.0</maven.compiler-plugin.version>
         <maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>
         <spotless.version>2.44.3</spotless.version>
@@ -49,15 +49,6 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <repositories>
-        <repository>
-            <id>central-portal-snapshots</id>
-            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
-            <releases><enabled>false</enabled></releases>
-            <snapshots><enabled>true</enabled><updatePolicy>always</updatePolicy></snapshots>
-        </repository>
-    </repositories>
 
     <build>
         <pluginManagement>
